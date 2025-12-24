@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Captain Mode: High-contrast, data-dense styling */
+.captain-mode {
+  @apply bg-slate-900 text-slate-100;
+}
+
+.captain-header {
+  @apply bg-slate-800 border-b-2 border-slate-700 px-6 py-4 font-bold text-lg;
+}
+
+/* Judge-Ready Print Styles */
+@media print {
+  @page {
+    margin: 1in;
+  }
+  
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+  
+  .no-print {
+    display: none;
+  }
+}
+
