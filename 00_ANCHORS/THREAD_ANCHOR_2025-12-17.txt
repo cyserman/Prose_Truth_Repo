@@ -1,0 +1,35 @@
+THREAD ANCHOR
+F250 -> Legal -> Pro Se App
+Date: 2025-12-17
+Owner: Christopher Firey
+
+PURPOSE
+-------
+This document freezes the factual, strategic, and architectural conclusions reached
+across a long, mixed-context thread. It prevents loss of context.
+
+SECTION 1 — IMMEDIATE REALITY (GROUND TRUTH)
+• Primary vehicle (2004 Ford F-250) failure during custody exchange.
+• Driving unsafe vehicle was avoided.
+• Missed exchanges were safety-based, not willful.
+• Communication interference is ongoing (blocked app).
+• Father is housing-insecure but employed.
+
+SECTION 2 — CORE LEGAL THEORY
+This case centers on a **manufactured imbalance**, not parental fitness.
+The pattern: Removal -> Denial of tools -> PFA filings -> Delay -> Status Quo hardening.
+Requested relief is CORRECTIVE, not PUNITIVE.
+
+SECTION 3 — STRATEGIC OBJECTIVES
+1. Neutralize presumption of status quo.
+2. Restore court oversight.
+3. Re-establish parent-child contact.
+4. Remove financial leverage.
+
+SECTION 4 — TIMELINE-FIRST STRATEGY
+If it can be dated, it goes on the timeline.
+If it can be documented, it gets an exhibit code.
+Goal: Judge understands case in <10 mins.
+
+SECTION 5 — SOFTWARE
+Local-first Pro Se Legal DB: Import -> Index -> Print.
