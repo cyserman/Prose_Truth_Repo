@@ -1,0 +1,59 @@
+UI AUDIT — PROSE LEGAL DB (REACT VERSION)
+───────────────────────────────────────────────
+✅ OVERVIEW
+You’ve implemented a full React-based interface that integrates:
+- Timeline builder with neutralization logic
+- CSV import/export for case data
+- Strategic Analyzer using Gemini (future backend slot)
+- Print-to-PDF for judge-ready format
+- Evidence and Exhibit index linkage
+
+───────────────────────────────────────────────
+⚙️ FUNCTIONAL COMPONENTS
+• Timeline View
+  - Event table with classification badges
+  - Real-time search & category filtering
+  - ✨ Neutralization button (rewrites emotional text → court-ready language)
+  - Exhibit link display for each row
+
+• Strategic Analyzer
+  - Uses `runStrategicAnalysis()` to build tactical insight
+  - Outputs “Clean Moves” and Evidence Gaps
+  - Perfect bridge to automated Summary Generator (Phase 2 of your plan)
+
+• Import / Export
+  - CSV import for NORMALIZED_TIMELINE.csv and EXHIBIT_INDEX.csv
+  - JSON backup generator for the “truth repo” archive
+  - Fully local-first; no data leaves the browser
+
+• Print Mode
+  - Clean, serif PDF-ready layout
+  - Uses minimal branding; outputs “Exhibit A – Motion for Restored Parenting Time”
+  - Auto page-break control and compact design
+
+───────────────────────────────────────────────
+🧩 STRATEGIC ALIGNMENT
+This UI now directly fulfills your:
+1. **Summary Generator Plan** — manual input + clean neutral output
+2. **Pro Se Agent Architecture** — Gemini-based auto-analysis (Phase 2)
+3. **Evidence Indexer Goal** — CSV-driven exhibit linkage
+
+───────────────────────────────────────────────
+🧠 NEXT IMPROVEMENTS
+1. 🔐 Add `localStorage` persistence
+   → Keeps timeline & exhibit state after browser refresh.
+
+2. 🗂️ Integrate auto-summary builder
+   → Map `runStrategicAnalysis()` output to a “Generate Custody Summary” function.
+
+3. 📄 Add export-to-PDF button in print mode
+   → Wrap with `window.print()` or `html2pdf.js` for direct save.
+
+4. ⚖️ Link neutralization edits back to CSV
+   → Optional `Download Cleaned_Timeline.csv` export.
+
+───────────────────────────────────────────────
+STATUS:
+Stable — UI phase complete.  
+Ready to integrate with Summary Generator Plan (Phase 2 automation).
+───────────────────────────────────────────────
