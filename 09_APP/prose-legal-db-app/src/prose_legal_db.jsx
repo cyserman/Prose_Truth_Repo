@@ -133,9 +133,20 @@ function downloadText(filename, text) {
 
 /* ----------------------------- Gemini helpers ---------------------------- */
 
-const DEFAULT_MODEL = "gemini-flash-latest";
-const GEMINI_KEY = import.meta?.env?.VITE_GEMINI_API_KEY || "";
-const GEMINI_MODEL = import.meta?.env?.VITE_GEMINI_MODEL || DEFAULT_MODEL;
+const DEFAULT_MODEL = "gemini-2.0-flash";
+// Environment variable approach with fallback
+let GEMINI_KEY = "";
+let GEMINI_MODEL = DEFAULT_MODEL;
+try {
+  GEMINI_KEY = import.meta.env?.VITE_GEMINI_API_KEY || "";
+  GEMINI_MODEL = import.meta.env?.VITE_GEMINI_MODEL || DEFAULT_MODEL;
+} catch (e) {
+  // Environment variable loading failed
+}
+// Fallback for local development
+if (!GEMINI_KEY) {
+  GEMINI_KEY = "AIzaSyDAJ0UJeZOjTQHRRMkbmWv1wg93wBebiOo";
+}
 
 async function geminiGenerateText({ prompt, system, temperature = 0.3 }) {
   if (!GEMINI_KEY) {
@@ -212,23 +223,108 @@ function Section({ title, children, right }) {
   );
 }
 
-function TextArea({ value, onChange, placeholder, rows = 4 }) {
+function TextArea({ value, onChange, placeholder, rows = 4, showMic = false, onMicResult }) {
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
+
+  function startListening() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert("Speech recognition not supported in this browser. Try Chrome or Edge.");
+      return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = (e) => {
+      console.error("Speech error:", e.error);
+      setIsListening(false);
+    };
+    
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      
+      if (finalTranscript) {
+        const newValue = value ? value + ' ' + finalTranscript : finalTranscript;
+        onChange(newValue);
+        if (onMicResult) onMicResult(newValue);
+      }
+    };
+    
+    recognitionRef.current = recognition;
+    recognition.start();
+  }
+
+  function stopListening() {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+  }
+
   return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      style={{
-        width: "100%",
-        borderRadius: 10,
-        border: "1px solid rgba(0,0,0,0.2)",
-        padding: 10,
-        fontFamily: "inherit",
-        fontSize: 14,
-        resize: "vertical",
-      }}
-    />
+    <div style={{ position: "relative" }}>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        spellCheck={true}
+        style={{
+          width: "100%",
+          borderRadius: 10,
+          border: isListening ? "2px solid #ef4444" : "1px solid rgba(0,0,0,0.2)",
+          padding: 10,
+          paddingRight: showMic ? 44 : 10,
+          fontFamily: "inherit",
+          fontSize: 14,
+          resize: "vertical",
+          background: isListening ? "rgba(239, 68, 68, 0.05)" : "white",
+        }}
+      />
+      {showMic && (
+        <button
+          type="button"
+          onClick={isListening ? stopListening : startListening}
+          title={isListening ? "Stop listening (click to stop)" : "Start voice input (click to speak)"}
+          style={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            border: "none",
+            background: isListening ? "#ef4444" : "rgba(0,0,0,0.08)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 16,
+            transition: "all 0.2s",
+            animation: isListening ? "pulse 1.5s infinite" : "none",
+          }}
+        >
+          {isListening ? "⏹️" : "🎤"}
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -334,6 +430,13 @@ export default function ProSeLegalDB() {
   const [statusMsg, setStatusMsg] = useState("");
   const [busyId, setBusyId] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Language Normalizer state
+  const [normalizerInput, setNormalizerInput] = useState("");
+  const [normalizerOutput, setNormalizerOutput] = useState("");
+  const [normalizerDate, setNormalizerDate] = useState(formatDateInput(new Date()));
+  const [normalizerTitle, setNormalizerTitle] = useState("");
+  const [isNormalizing, setIsNormalizing] = useState(false);
 
   useEffect(() => {
     const saved = safeJsonParse(localStorage.getItem(LS_KEY), null);
@@ -476,6 +579,97 @@ export default function ProSeLegalDB() {
     return { missingExhibitRefs, unreferencedExhibits };
   }, [events, exhibits, exhibitCodes]);
 
+  /* ----------------------------- Agent Persona Context ---------------------------- */
+
+  const AGENT_SYSTEM_CONTEXT = `You are "Pro Se Case Manager (Truth Repo Edition)" — a legal project assistant for a self-represented litigant in Montgomery County, Pennsylvania.
+
+CASE CONTEXT:
+- Case: ${caseName}
+- Court: ${court}
+- Matter: ${matter}
+- Core Legal Theory: This case centers on a "manufactured imbalance" — a pattern of removal, denial of tools, delay, and status quo hardening. Relief sought is CORRECTIVE, not PUNITIVE.
+
+YOUR PRIME DIRECTIVES:
+1. NEUTRALIZE emotional input — remove accusations, harsh words, emotional language
+2. OUTPUT court-ready language — professional, factual, suitable for judicial review
+3. PRESERVE facts — do not add, infer, or speculate; keep dates/names/exhibits unchanged
+4. FOCUS on "what happened" not "who is bad"
+5. Frame events as observations, not judgments
+
+WHAT WINNING LOOKS LIKE (for context):
+- Winning is correction and trajectory, not domination
+- Goal: Judge understands case in <10 minutes
+- Winning is NOT: public scolding, moral vindication, or instant 50/50
+
+LANGUAGE TRANSFORMATION RULES:
+- "She refused" → "The request was declined"
+- "He was denied" → "Access was not provided"
+- "She blocked" → "Communication was unavailable"
+- "Deliberately withheld" → "Was not made available"
+- "Cruel" / "vindictive" / "manipulative" → REMOVE entirely, state facts only
+- Keep the SUBSTANCE, remove the STING
+- Output should read like a court filing, not a diary entry`;
+
+  /* ----------------------------- Language Normalizer ---------------------------- */
+
+  async function runNormalizer() {
+    if (!normalizerInput.trim()) {
+      toast("Enter your raw experience first.");
+      return;
+    }
+    setIsNormalizing(true);
+    setNormalizerOutput("");
+    try {
+      const system = AGENT_SYSTEM_CONTEXT + `
+
+SPECIFIC TASK: Language Normalizer
+You are transforming the user's emotional, raw description of an event into neutral, court-appropriate language.
+
+TRANSFORMATION RULES:
+- Remove ALL accusations, blame, harsh words, and emotional characterizations
+- Convert active blame ("she did X to hurt me") → passive observation ("X occurred")
+- "She refused" → "The request was declined"
+- "He was denied" → "Access was not provided"  
+- "She blocked" → "Communication was unavailable"
+- "Deliberately withheld" → "Was not made available"
+- Remove: "Cruel" / "vindictive" / "manipulative" / "heartbreaking" / "snatched"
+- Preserve dates, times, durations, names, and factual details EXACTLY
+- Output ONLY the rewritten text — no explanations, no headings
+- The result should be suitable for inclusion in a court motion or affidavit
+- Keep the SUBSTANCE, remove the STING`;
+
+      const prompt = `RAW INPUT FROM USER:\n${normalizerInput}\n\nTransform this into neutral, court-ready language. Remove all emotional content while preserving the facts.`;
+      const out = await geminiGenerateText({ prompt, system, temperature: 0.15 });
+      setNormalizerOutput(out);
+      toast("✓ Language normalized successfully.");
+    } catch (err) {
+      toast(err?.message || "Normalization failed.");
+    } finally {
+      setIsNormalizing(false);
+    }
+  }
+
+  function addNormalizedToTimeline() {
+    if (!normalizerOutput.trim()) {
+      toast("Nothing to add. Run the normalizer first.");
+      return;
+    }
+    const evt = {
+      id: uid("evt"),
+      date: normalizerDate || formatDateInput(new Date()),
+      title: normalizerTitle.trim() || "Event (from Normalizer)",
+      description: normalizerInput.trim(),
+      description_neutral: normalizerOutput.trim(),
+      exhibitRefs: "",
+      source: "normalizer",
+    };
+    setEvents((prev) => [...prev, evt]);
+    setNormalizerInput("");
+    setNormalizerOutput("");
+    setNormalizerTitle("");
+    toast("✓ Added to timeline with both original and normalized versions.");
+  }
+
   /* ----------------------------- Gemini actions ---------------------------- */
 
   async function neutralizeEvent(id) {
@@ -484,20 +678,26 @@ export default function ProSeLegalDB() {
 
     setBusyId(id);
     try {
-      const system =
-        "Rewrite user-provided event text into neutral, court-appropriate language. " +
-        "Rules: do not add facts, do not infer intent, do not speculate. Keep dates/names unchanged. " +
-        "Output only the rewritten neutral paragraph, no headings.";
+      const system = AGENT_SYSTEM_CONTEXT + `
+
+SPECIFIC TASK: Language Normalizer
+Transform the user's emotional description into neutral, court-appropriate language.
+- Remove ALL accusations, blame, harsh words, and emotional characterizations
+- Convert active blame ("she did X to hurt me") to passive observation ("X occurred")
+- Preserve dates, times, durations, and factual details exactly
+- Output ONLY the rewritten paragraph — no headings, no explanations
+- The result should be suitable for inclusion in a court motion or affidavit`;
+
       const prompt =
         `Original event title: ${evt.title}\n` +
         `Original description:\n${evt.description || "(none)"}\n\n` +
         `Exhibit refs: ${evt.exhibitRefs || "(none)"}\n\n` +
-        `Rewrite the description into neutral court-appropriate language.`;
-      const out = await geminiGenerateText({ prompt, system, temperature: 0.2 });
+        `Transform this into neutral, court-ready language. Remove all emotional content while preserving the facts.`;
+      const out = await geminiGenerateText({ prompt, system, temperature: 0.15 });
       updateEvent(id, { description_neutral: out });
-      toast("Neutral draft saved (original preserved).");
+      toast("✓ Language normalized (original preserved).");
     } catch (err) {
-      toast(err?.message || "Neutralize failed.");
+      toast(err?.message || "Language normalization failed.");
     } finally {
       setBusyId(null);
     }
@@ -506,22 +706,30 @@ export default function ProSeLegalDB() {
   async function strategicAnalysis() {
     setBusyId("analysis");
     try {
-      const system =
-        "You are a legal project assistant. Provide neutral, practical analysis. " +
-        "Do not invent facts. Use cautious language. Output as bullet points with headings.";
+      const system = AGENT_SYSTEM_CONTEXT + `
+
+SPECIFIC TASK: Strategic Case Analysis
+Analyze the timeline and provide tactical guidance.
+- Identify defensible themes based ONLY on documented facts
+- Identify evidence gaps (what would a judge want to see?)
+- Suggest next actions for organizing exhibits and filings
+- Provide devil's-advocate counterpoints (what opposing counsel might argue)
+- DO NOT invent facts or speculate
+- Frame everything in terms of "manufactured imbalance" theory where applicable`;
+
       const timeline = [...events].sort(sortByDateAsc).map((e) => {
         const neutralTag = e.description_neutral ? " (has neutral draft)" : "";
         return `- ${e.date || ""}: ${e.title}${neutralTag}\n  Original: ${e.description || ""}\n  Exhibits: ${e.exhibitRefs || ""}`;
       });
       const prompt =
-        `Case: ${caseName}\nCourt: ${court}\nMatter: ${matter}\n\n` +
-        `Timeline:\n${timeline.join("\n")}\n\n` +
-        `Tasks:\n` +
-        `1) Identify 3–6 defensible themes based on the facts.\n` +
-        `2) List missing evidence gaps (what would a judge want to see?)\n` +
-        `3) Give next 5 actions to organize exhibits and filings.\n` +
-        `4) Provide devil’s-advocate counterpoints (what opposing counsel might argue) without adding new facts.\n`;
-      const out = await geminiGenerateText({ prompt, system, temperature: 0.3 });
+        `TIMELINE:\n${timeline.join("\n")}\n\n` +
+        `ANALYSIS REQUESTED:\n` +
+        `1) Identify 3–6 defensible themes based on documented facts\n` +
+        `2) List evidence gaps — what would a judge want to see?\n` +
+        `3) Recommend next 5 actions for exhibits and filings\n` +
+        `4) Devil's advocate: what might opposing counsel argue?\n` +
+        `5) How does this timeline support or challenge the "manufactured imbalance" theory?`;
+      const out = await geminiGenerateText({ prompt, system, temperature: 0.25 });
 
       const analysisEvt = {
         id: uid("evt"),
@@ -791,6 +999,11 @@ export default function ProSeLegalDB() {
           .no-print { display: none !important; }
           body { background: white; }
         }
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+          70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
       `}</style>
 
       <div className="no-print">
@@ -835,9 +1048,99 @@ export default function ProSeLegalDB() {
           </div>
         ) : (
           <div style={{ marginTop: 10, fontSize: 12, opacity: 0.75 }}>
-            Gemini model: <code>{GEMINI_MODEL || DEFAULT_MODEL}</code>
+            ✓ AI Features Enabled — Model: <code>{GEMINI_MODEL || DEFAULT_MODEL}</code>
           </div>
         )}
+      </Section>
+
+      {/* ===== LANGUAGE NORMALIZER - The star feature! ===== */}
+      <Section
+        title="⚖️ Language Normalizer"
+        right={
+          <div style={{ fontSize: 12, opacity: 0.75 }}>
+            Transform emotional → court-ready
+          </div>
+        }
+      >
+        <div style={{ 
+          background: "linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.05) 100%)",
+          border: "1px solid rgba(59, 130, 246, 0.2)",
+          borderRadius: 12, 
+          padding: 16,
+          marginBottom: 12
+        }}>
+          <div style={{ fontSize: 13, marginBottom: 12, opacity: 0.85 }}>
+            <b>How it works:</b> Enter your raw experience below — emotional language, frustrations, accusations — 
+            and the AI will transform it into neutral, court-appropriate language while preserving all facts.
+          </div>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            {/* LEFT: Raw Input */}
+            <div>
+              <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 6, fontWeight: 600 }}>
+                📝 Your Raw Experience
+              </div>
+              <TextArea
+                value={normalizerInput}
+                onChange={setNormalizerInput}
+                placeholder="Enter your raw experience here (or click 🎤 to speak)... 
+
+Example: 'My parents drove 4 hours from Virginia. She only allowed me 18 minutes with my boys. It was cruel and heartbreaking. She deliberately ruined Christmas to hurt me and my family.'"
+                rows={8}
+                showMic={true}
+              />
+              <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <div style={{ flex: 1, minWidth: 120 }}>
+                  <div style={{ fontSize: 11, opacity: 0.65, marginBottom: 4 }}>Date (optional)</div>
+                  <Input value={normalizerDate} onChange={setNormalizerDate} type="date" />
+                </div>
+                <div style={{ flex: 2, minWidth: 200 }}>
+                  <div style={{ fontSize: 11, opacity: 0.65, marginBottom: 4 }}>Event Title (optional)</div>
+                  <Input value={normalizerTitle} onChange={setNormalizerTitle} placeholder="e.g., Christmas parenting time" />
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT: Normalized Output */}
+            <div>
+              <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 6, fontWeight: 600 }}>
+                ⚖️ Court-Ready Output
+              </div>
+              <TextArea
+                value={normalizerOutput}
+                onChange={setNormalizerOutput}
+                placeholder="Normalized text will appear here after you click 'Normalize'..."
+                rows={8}
+              />
+              <div style={{ marginTop: 10, display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <Button
+                  onClick={addNormalizedToTimeline}
+                  disabled={!normalizerOutput.trim()}
+                  variant="ghost"
+                  title="Add both original and normalized versions to the timeline"
+                >
+                  Add to Timeline →
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
+            <Button
+              onClick={runNormalizer}
+              disabled={isNormalizing || !normalizerInput.trim()}
+              title="Transform to court-ready language"
+            >
+              {isNormalizing ? "✨ Normalizing..." : "⚖️ Normalize Language"}
+            </Button>
+          </div>
+        </div>
+
+        <div style={{ fontSize: 12, opacity: 0.7, fontStyle: "italic" }}>
+          <b>Transformation examples:</b> "She refused" → "The request was declined" • 
+          "He was denied" → "Access was not provided" • 
+          "cruel and heartbreaking" → (removed, facts preserved)
+        </div>
       </Section>
 
       <Section
@@ -887,7 +1190,7 @@ export default function ProSeLegalDB() {
         </div>
 
         <div style={{ marginTop: 10, fontSize: 12, opacity: 0.75 }}>
-          Devil’s advocate note: missing exhibits and “floating” exhibits are exactly where credibility arguments get traction.
+          Devil's advocate note: missing exhibits and "floating" exhibits are exactly where credibility arguments get traction.
         </div>
       </Section>
 
@@ -941,9 +1244,9 @@ export default function ProSeLegalDB() {
                     <Button
                       onClick={() => neutralizeEvent(e.id)}
                       disabled={busyId === e.id}
-                      title="Generate neutral rewrite (stored separately, original preserved)"
+                      title="Transform to court-ready language (removes emotional content, preserves facts)"
                     >
-                      {busyId === e.id ? "Neutralizing..." : "Neutralize"}
+                      {busyId === e.id ? "Normalizing..." : "Normalize Language"}
                     </Button>
                     <Button onClick={() => deleteEvent(e.id)} variant="danger" title="Delete event">
                       Delete
@@ -1072,7 +1375,7 @@ export default function ProSeLegalDB() {
               Use <b>Print policy</b> to control what appears in print and court packet exports.
             </li>
             <li>
-              Devil’s advocate: if anything looks “rewritten,” you want the chain to be obvious: original → draft → verified filing.
+              Devil's advocate: if anything looks "rewritten," you want the chain to be obvious: original → draft → verified filing.
             </li>
           </ul>
         </div>
