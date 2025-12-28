@@ -1,0 +1,18 @@
+
+# Environment files
+.env
+.env.local
+
+# Backup files
+*.backup
+*.v2.backup
+
+# Trash/archive folders
+06_SCANS/INBOX/to_trash/
+06_SCANS/INBOX/new/
+
+# Workspace files
+*.code-workspace
+
+# Embedded git repos in trash
+**/to_trash/**/.git/

@@ -1,0 +1,392 @@
+Here you go, captain. One clean cheat sheet + the nano quick-guide so you never get stuck again.
+Short, sharp, and Chromebook-friendly. ⚡💻
+
+
+---
+
+✅ CHEAT SHEET: Running the Duplicate-Cleaner Script
+
+1. Open the Linux Terminal
+
+On your Chromebook:
+Launcher → Linux apps → Terminal
+
+
+✅ 2. Open Nano Editor
+
+To open a file in nano:
+
+nano filename.py
+
+Examples:
+
+nano find_office_duplicates.py
+
+If the file doesn’t exist yet, nano will create it when you save.
+
+
+---
+
+✅ 3. Nano Controls (never memorized? use this)
+
+Inside nano:
+
+Action	Keys
+
+Save	Ctrl + O, then press Enter
+Exit nano	Ctrl + X
+Cut line	Ctrl + K
+Paste line	Ctrl + U
+Search	Ctrl + W
+Help	Ctrl + G
+
+
+Nano shows commands at the bottom…but they use ^ to mean Control.
+
+
+---
+
+✅ 4. Make the Script Executable
+
+Once your script is saved and closed:
+
+chmod +x ~/find_office_duplicates.py
+
+
+---
+
+✅ 5. Create Quarantine Folder (safe deletion zone)
+
+mkdir -p "$HOME/Duplicates_Quarantine"
+
+
+---
+
+✅ 6. Run the Script (DRY RUN) — nothing moved
+
+python3 ~/find_office_duplicates.py --root "$HOME"
+
+
+---
+
+✅ 7. Run the Script FOR REAL — moves duplicates
+
+python3 ~/find_office_duplicates.py \
+  --root "$HOME" \
+  --quarantine "$HOME/Duplicates_Quarantine"
+
+
+---
+
+⚠️ Optional: Check What Got Moved
+
+ls ~/Duplicates_Quarantine | head
+du -sh ~/Duplicates_Quarantine
+
+
+---
+
+🔧 Want extra shortcuts?
+
+Open directory in terminal
+
+cd ~/Projects
+
+List files with sizes
+
+ls -lh
+
+Search for files
+
+find . -name "*.docx"
+
+
+---
+
+⭐ Want me to generate a printable cheat sheet page (PDF, PNG, or text)?
+
+One tap and I can format it perfectly for your Chromebook + Pro Se workflow.
+
+
+#!/usr/bin/env python3
+"""
+find_office_duplicates.py
+
+Find (and optionally move) duplicate Office-type documents.
+
+Usage examples:
+
+  # Dry run on your Linux home folder only
+  python3 find_office_duplicates.py --root "$HOME"
+
+  # Dry run on Linux home + ChromeOS MyFiles + Google Drive (if mounted)
+  python3 find_office_duplicates.py \
+      --root "$HOME" \
+      --root "/mnt/chromeos/MyFiles" \
+      --root "/mnt/chromeos/GoogleDrive"
+
+  # Actually move duplicates into a quarantine folder in your home
+
+  
+  python3 find_office_duplicates.py --root "$HOME" \
+      --quarantine "$HOME/Duplicates_Quarantine"
+
+Behavior:
+  - Only considers files with known Office-like extensions.
+  - Groups by size first, then by SHA256 hash to confirm true duplicates.
+  - Keeps ONE "keeper" per group:
+      * Largest file wins
+      * If sizes tie, newest (latest mtime) wins
+  - If --quarantine is provided, duplicates are moved there.
+"""
+
+import argparse
+import hashlib
+import os
+import shutil
+import sys
+from collections import defaultdict
+from typing import Dict, List, Tuple
+
+# Office / office-like extensions to consider
+OFFICE_EXTS = {
+    ".doc", ".docx",
+    ".xls", ".xlsx",
+    ".ppt", ".pptx",
+    ".odt", ".ods", ".odp",
+    ".rtf",
+    ".txt",  # include text files; remove if you want stricter behavior
+}
+
+
+def is_office_file(path: str) -> bool:
+    """Return True if the file extension matches known Office-like types."""
+    return os.path.splitext(path)[1].lower() in OFFICE_EXTS
+
+
+def iter_files(roots: List[str]) -> List[str]:
+    """
+    Walk the given roots and collect Office-like files.
+
+    Skips:
+      - hidden directories
+      - venv / site-packages / __pycache__
+      - ProSeAgent backups
+    """
+    all_files: List[str] = []
+
+    SKIP_DIR_FRAGMENTS = [
+        "venv",
+        "__pycache__",
+        "site-packages",
+        "ProSeAgent_backup_",
+    ]
+
+    for root in roots:
+        if not os.path.isdir(root):
+            print(f"[WARN] Not a directory: {root}")
+            continue
+
+        for dirpath, dirnames, filenames in os.walk(root):
+            # Filter out hidden dirs and dirs we want to skip
+            dirnames[:] = [
+                d for d in dirnames
+                if not d.startswith(".")
+                and not any(
+                    skip in os.path.join(dirpath, d)
+                    for skip in SKIP_DIR_FRAGMENTS
+                )
+            ]
+
+            for f in filenames:
+                if f.startswith("."):
+                    continue
+                p = os.path.join(dirpath, f)
+                if is_office_file(p):
+                    all_files.append(p)
+
+    return all_files
+
+
+def sha256_of_file(path: str, chunk_size: int = 1_048_576) -> str:
+    """Compute SHA256 hash of a file in streaming chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(chunk_size), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def group_by_size(files: List[str]) -> Dict[int, List[str]]:
+    """Group files by size."""
+    groups: Dict[int, List[str]] = defaultdict(list)
+    for p in files:
+        try:
+            size = os.path.getsize(p)
+            groups[size].append(p)
+        except Exception as e:
+            print(f"[WARN] stat failed for {p}: {e}")
+    return groups
+
+
+def group_by_hash(files: List[str]) -> Dict[str, List[str]]:
+    """Group files by SHA256 hash."""
+    groups: Dict[str, List[str]] = defaultdict(list)
+    for p in files:
+        try:
+            h = sha256_of_file(p)
+            groups[h].append(p)
+        except Exception as e:
+            print(f"[WARN] hash failed for {p}: {e}")
+    return groups
+
+
+def choose_keeper(paths: List[str]) -> str:
+    """
+    Choose which file to keep in a duplicate group.
+
+    Strategy:
+      - Prefer the LARGEST file.
+      - If sizes tie, prefer the NEWEST (largest mtime).
+    """
+
+    def sort_key(p: str):
+        size = os.path.getsize(p)
+        mtime = os.path.getmtime(p)
+        return (size, mtime)
+
+    return max(paths, key=sort_key)
+
+
+def encode_path_for_quarantine(path: str) -> str:
+    """
+    Turn a full path into a single safe filename for quarantine.
+
+    Example:
+      /home/user/docs/file.docx
+      -> home__user__docs__file.docx
+    """
+    stripped = path.lstrip(os.sep)
+    return "__".join(stripped.split(os.sep))
+
+
+def move_to_quarantine(path: str, qdir: str) -> str:
+    """Move a file into the quarantine dir, avoiding name collisions."""
+    os.makedirs(qdir, exist_ok=True)
+    base = encode_path_for_quarantine(path)
+    dest = os.path.join(qdir, base)
+
+    # Avoid collisions in quarantine
+    if os.path.exists(dest):
+        root, ext = os.path.splitext(dest)
+        i = 1
+        while True:
+            new = f"{root}__dup{i}{ext}"
+            if not os.path.exists(new):
+                dest = new
+                break
+            i += 1
+
+    shutil.move(path, dest)
+    return dest
+
+
+def find_duplicates(roots: List[str]) -> List[Tuple[str, List[str]]]:
+    """
+    Return a list of (keeper, [duplicates]) tuples.
+
+    Workflow:
+      - Collect all Office-like files.
+      - Group by size.
+      - Within each size group, group by hash.
+      - For any hash group with >1 file:
+          keeper = choose_keeper(...)
+          dups   = everything else
+    """
+    all_files = iter_files(roots)
+    print(f"[INFO] Found {len(all_files)} candidate Office files.")
+
+    by_size = group_by_size(all_files)
+    size_dupes = [v for v in by_size.values() if len(v) > 1]
+
+    results: List[Tuple[str, List[str]]] = []
+    for group in size_dupes:
+        hashed = group_by_hash(group)
+        for h, paths in hashed.items():
+            if len(paths) < 2:
+                continue
+            keeper = choose_keeper(paths)
+            dups = [p for p in paths if p != keeper]
+            if dups:
+                results.append((keeper, dups))
+    return results
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Find and optionally move duplicate Office documents."
+    )
+    parser.add_argument(
+        "--root",
+        action="append",
+        help="Folder to scan (can be used multiple times). Default: $HOME",
+    )
+    parser.add_argument(
+        "--quarantine",
+        help="Folder to move duplicates into (if omitted, dry run only).",
+    )
+    args = parser.parse_args()
+
+    roots = args.root or [os.path.expanduser("~")]
+    qdir = args.quarantine
+
+    print("[INFO] Scanning:")
+    for r in roots:
+        print("  -", r)
+
+    if qdir:
+        print(f"[INFO] Quarantine folder: {qdir}")
+    else:
+        print("[INFO] DRY RUN. No files will be moved.")
+
+    dupe_groups = find_duplicates(roots)
+    if not dupe_groups:
+        print("[INFO] No duplicates found.")
+        return 0
+
+    print(f"[INFO] Found {len(dupe_groups)} duplicate groups.")
+    total_dups = 0
+
+    for i, (keeper, dups) in enumerate(dupe_groups, 1):
+        print(f"\n=== Group {i} ===")
+        print("KEEP:", keeper)
+        print("DUPES:")
+        for d in dups:
+            total_dups += 1
+            if qdir:
+                try:
+                    newp = move_to_quarantine(d, qdir)
+                    print("  MOVED:", d, "->", newp)
+                except Exception as e:
+                    print("  [ERR] Move failed:", d, e)
+            else:
+                print("  ", d)
+
+    print(f"\n[INFO] Total duplicates {'moved' if qdir else 'found'}: {total_dups}")
+    return 0
+
+
+if __name__ == "__main__":
+
+
+
+
+###to include sd card, USB
+
+python3 ~/find_office_duplicates.py \
+  --root "/mnt/chromeos/removable/Mirror" \
+  --quarantine "$HOME/Duplicates_Quarantine"
+
+    python3 ~/find_office_duplicates.py \
+  --root "/mnt/chromeos/removable/USB Drive" \
+  --quarantine "$HOME/Duplicates_Quarantine"

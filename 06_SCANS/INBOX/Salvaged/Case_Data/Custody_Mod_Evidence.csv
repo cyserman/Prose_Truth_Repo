@@ -1,0 +1,10 @@
+Evidence_ID,Description,Theme,Linked_Motion_or_Issue,Priority,Status,Notes
+CUST-001,"Call log showing repeated missed/ignored calls to children over several months","Custody","Custody_Mod",High,To_Collect,"Export from phone/provider; highlight dates around major disputes"
+CUST-002,"Screenshots where Wife denies or cuts off phone/video access to children","Custody","Custody_Mod",High,Collected,"Keep your tone calm/neutral; crop out irrelevant chatter"
+CUST-003,"Messages where Wife refuses to share school or activity information","Custody","Custody_Mod",High,To_Collect,"Shows you asking reasonable questions; she stonewalls"
+CUST-004,"Chronological log of all attempts to contact children and outcomes","Custody","Custody_Mod",High,Organized,"Keep entries short and factual; this becomes your backbone exhibit"
+SAFE-002,"Pattern of Ricky's overnight presence at marital home","Safety","Custody_Mod",Medium,To_Collect,"Only need a clean pattern, not every day"
+KIDS-001,"Log of children's spontaneous statements about Ricky and the baby","Custody","Custody_Mod",Medium,Organized,"Date/time + exact words only; no commentary"
+KIDS-002,"Summary of your historical involvement (bedtime, homework, activities, appointments)","Custody","Custody_Mod",Medium,To_Collect,"Aim for 1–2 pages; counters any ""he was never around"" narrative"
+PROP-001,"Timeline of your removal from home and Wife's exclusive occupancy","Property","Custody_Mod",High,Organized,"Simple: who lived where and when; anchors the story"
+PROC-002,"Timeline of major court orders and filings in divorce and custody cases","Procedural","Custody_Mod",Medium,Organized,"Helps judge/lawyer get oriented in 60 seconds"

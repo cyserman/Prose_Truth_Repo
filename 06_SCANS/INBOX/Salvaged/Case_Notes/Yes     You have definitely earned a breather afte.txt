@@ -1,0 +1,197 @@
+Yes. 😂 You have definitely earned a breather after this lap.
+
+Before you chill, here’s a tiny smoke test plan you can do in 10–15 minutes so your brain knows the system is “real” and not just theory.
+
+
+---
+
+1. Smoke test the custody CSV
+
+Goal: Confirm Custody_Mod_Evidence.csv behaves like a control panel, not a pile of text.
+
+1. Open Custody_Mod_Evidence.csv in Excel/Sheets/DeX editor.
+
+
+2. Turn on filters.
+
+
+3. Change one row:
+
+Pick CUST-004 and set Status from Organized → Used_in_Filing (or To_Collect → Collected if that’s more honest).
+
+
+
+4. Save it.
+
+
+
+✅ If that works cleanly and still looks tabular, the sheet is good.
+
+
+---
+
+2. Smoke test sticky_index.json wiring
+
+Goal: Make sure JSON is valid and has at least one sticky tied to evidence.
+
+Add one sticky like this somewhere in sticky_index.json:
+
+{
+  "id": "sticky-2024-03-10-sunday-call",
+  "title": "Wife blocked Sunday call",
+  "category": "custody",
+  "date": "2024-03-10",
+  "tags": ["calls", "blocked", "alienation"],
+  "evidence_ids": ["CUST-002", "CUST-004"],
+  "notes": "Use when arguing pattern of contact interference."
+}
+
+Then, on any machine with Python:
+
+python - << 'PY'
+import json, pathlib
+
+path = pathlib.Path("my_real_case/sticky_index.json")  # adjust if needed
+data = json.loads(path.read_text())
+print(f"Loaded {len(data)} stickies. First sticky evidence_ids:", data[0].get("evidence_ids"))
+PY
+
+✅ If it prints without blowing up, your JSON structure is valid and evidence_ids is wired.
+
+
+---
+
+3. Smoke test timeline.csv wiring
+
+Goal: Confirm Evidence_IDs column parses and links to real IDs.
+
+Add a row like:
+
+2024-03-10,"Sunday call blocked","Custody","CUST-002;CUST-004","Match to screenshots + contact log"
+
+Then run this little Python check:
+
+python - << 'PY'
+import csv, pathlib
+
+path = pathlib.Path("my_real_case/timeline.csv")  # adjust if needed
+with path.open(newline='', encoding='utf-8') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        if row.get("Evidence_IDs"):
+            ids = [x.strip() for x in row["Evidence_IDs"].split(";") if x.strip()]
+            print(row["Date"], row["Event"], "->", ids)
+PY
+
+✅ If it prints the IDs as a list, your Evidence_IDs field is working.
+
+
+---
+
+4. Optional: one tiny “lint” script to sanity-check everything
+
+If you’ve got a bit more gas in the tank before the breather, this gives you instant confidence that nothing is out of sync.
+
+Create lint_evidence_links.py:
+
+import csv
+import json
+from pathlib import Path
+
+BASE = Path("my_real_case")  # adjust base if needed
+
+custody_csv = BASE / "Custody_Mod_Evidence.csv"
+sticky_json = BASE / "sticky_index.json"
+timeline_csv = BASE / "timeline.csv"
+
+def load_evidence_ids():
+    ids = set()
+    with custody_csv.open(newline='', encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            eid = row.get("Evidence_ID")
+            if eid:
+                ids.add(eid.strip())
+    return ids
+
+def load_sticky_ids():
+    ids = set()
+    if not sticky_json.exists():
+        return ids
+    data = json.loads(sticky_json.read_text(encoding="utf-8"))
+    for sticky in data:
+        for eid in sticky.get("evidence_ids", []):
+            ids.add(eid.strip())
+    return ids
+
+def load_timeline_ids():
+    ids = set()
+    if not timeline_csv.exists():
+        return ids
+    with timeline_csv.open(newline='', encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            field = row.get("Evidence_IDs") or ""
+            for eid in [x.strip() for x in field.split(";") if x.strip()]:
+                ids.add(eid)
+    return ids
+
+def main():
+    evidence_ids = load_evidence_ids()
+    sticky_ids = load_sticky_ids()
+    timeline_ids = load_timeline_ids()
+
+    print(f"Evidence IDs in CSV: {len(evidence_ids)}")
+    print(f"Referenced in stickies: {len(sticky_ids)}")
+    print(f"Referenced in timeline: {len(timeline_ids)}")
+
+    unknown_in_stickies = sticky_ids - evidence_ids
+    unknown_in_timeline = timeline_ids - evidence_ids
+
+    if unknown_in_stickies:
+        print("\n⚠ Unknown Evidence_IDs in stickies (not in CSV):")
+        for eid in sorted(unknown_in_stickies):
+            print("  -", eid)
+
+    if unknown_in_timeline:
+        print("\n⚠ Unknown Evidence_IDs in timeline (not in CSV):")
+        for eid in sorted(unknown_in_timeline):
+            print("  -", eid)
+
+    unused_evidence = evidence_ids - sticky_ids - timeline_ids
+    if unused_evidence:
+        print("\nℹ Evidence_IDs in CSV not referenced yet (fine, but FYI):")
+        for eid in sorted(unused_evidence):
+            print("  -", eid)
+
+    if not (unknown_in_stickies or unknown_in_timeline):
+        print("\n✅ Links look consistent. Nice work.")
+
+if __name__ == "__main__":
+    main()
+
+Run it:
+
+python lint_evidence_links.py
+
+If you get the ✅ message and maybe a few “not referenced yet,” that’s perfect for this stage.
+
+
+---
+
+After that: yes, breather.
+
+You’ve:
+
+Defined a custody evidence control panel
+
+Wired it to stickies and timeline
+
+Given Future You and any future lawyer a map instead of a junk drawer
+
+
+When you’re ready for the next round, we can either:
+
+Start plugging this into your ProSe tools, or
+
+Use this structure to prep exhibits for the next custody filing.

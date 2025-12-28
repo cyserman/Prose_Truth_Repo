@@ -1,0 +1,247 @@
+Perfect, log-brain is online 🧠📓
+
+You’ve already:
+
+Created Summaries/Input, Summaries/Generated, Summaries/Templates
+
+Confirmed: no safe_gpt.py, no gpt_*, no openai references
+
+
+So the next smart move is exactly what you said: drop in run_summary_once.py that does a clean, API-free smoke test on an Excel file.
+
+Below is a ready-to-paste version you can put at repo root as run_summary_once.py.
+
+
+---
+
+run_summary_once.py (stubbed, no GPT calls)
+
+#!/usr/bin/env python
+"""
+run_summary_once.py
+
+Phase 1:
+- Locate an input Excel file in Summaries/Input (or use --input).
+- Load workbook.
+- Print sheet names and column headers.
+- Write a simple text summary file under Summaries/Generated.
+- NO external API calls yet.
+"""
+
+import argparse
+from pathlib import Path
+import sys
+
+try:
+    import pandas as pd
+except ImportError:
+    print("Missing dependency: pandas. Add it to requirements.txt and install it.")
+    sys.exit(1)
+
+
+# Base directories relative to this script
+ROOT_DIR = Path(__file__).resolve().parent
+SUMMARIES_ROOT = ROOT_DIR / "Summaries"
+INPUT_DIR = SUMMARIES_ROOT / "Input"
+GENERATED_DIR = SUMMARIES_ROOT / "Generated"
+TEMPLATES_DIR = SUMMARIES_ROOT / "Templates"
+
+
+def find_default_input() -> Path | None:
+    """Return the first .xlsx file in Summaries/Input, or None if none exist."""
+    if not INPUT_DIR.exists():
+        return None
+    xlsx_files = sorted(INPUT_DIR.glob("*.xlsx"))
+    return xlsx_files[0] if xlsx_files else None
+
+
+def load_workbook(path: Path) -> dict:
+    """
+    Load all sheets from an Excel file into a dict: {sheet_name: DataFrame}.
+    """
+    try:
+        # sheet_name=None -> dict of {sheet_name: df}
+        return pd.read_excel(path, sheet_name=None)
+    except Exception as exc:
+        print(f"Error reading Excel file '{path}': {exc}")
+        sys.exit(1)
+
+
+def summarize_sheet(sheet_name: str, df: "pd.DataFrame") -> str:
+    """
+    Return a plain-text summary for a single sheet:
+    - sheet name
+    - number of rows / columns
+    - column headers
+    - first few non-empty rows index (for sanity)
+    """
+    num_rows, num_cols = df.shape
+    columns = [str(c) for c in df.columns]
+
+    # find a few non-empty row indexes (just for debug)
+    non_empty_index = df.dropna(how="all").index.tolist()[:5]
+
+    lines = []
+    lines.append(f"Sheet: {sheet_name}")
+    lines.append(f"  Rows: {num_rows}, Columns: {num_cols}")
+    lines.append(f"  Columns: {', '.join(columns) if columns else '(no columns)'}")
+    if non_empty_index:
+        lines.append(f"  First non-empty row index(es): {non_empty_index}")
+    else:
+        lines.append("  No non-empty rows detected.")
+    return "\n".join(lines)
+
+
+def write_summary(output_path: Path, workbook_summary: list[str]) -> None:
+    """
+    Write all sheet summaries into a single text file.
+    """
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    content = "\n\n".join(workbook_summary) + "\n"
+    output_path.write_text(content, encoding="utf-8")
+
+
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(
+        description="Smoke-test Excel headers and structure for summary generation."
+    )
+    parser.add_argument(
+        "-i",
+        "--input",
+        type=Path,
+        help="Path to an Excel file. If omitted, use first .xlsx in Summaries/Input.",
+    )
+    parser.add_argument(
+        "--no-write",
+        action="store_true",
+        help="If set, do not write summary file, only print to stdout.",
+    )
+
+    args = parser.parse_args(argv)
+
+    # Resolve input path
+    input_path = args.input
+    if input_path is None:
+        input_path = find_default_input()
+        if input_path is None:
+            print(
+                f"No input file provided and no .xlsx files found in '{INPUT_DIR}'.\n"
+                f"Drop a workbook into Summaries/Input or pass --input."
+            )
+            sys.exit(1)
+
+    if not input_path.exists():
+        print(f"Input file not found: {input_path}")
+        sys.exit(1)
+
+    print(f"[run_summary_once] Using input workbook: {input_path}")
+
+    # Load workbook
+    workbook = load_workbook(input_path)
+    if not workbook:
+        print("Workbook appears to have no sheets.")
+        sys.exit(1)
+
+    print(f"[run_summary_once] Found sheets: {', '.join(workbook.keys())}")
+
+    # Build per-sheet summaries
+    all_summaries: list[str] = []
+    for sheet_name, df in workbook.items():
+        sheet_summary = summarize_sheet(sheet_name, df)
+        all_summaries.append(sheet_summary)
+        # Also print to stdout for the smoke test
+        print()
+        print(sheet_summary)
+
+    # Write combined summary file unless suppressed
+    if not args.no_write:
+        output_name = input_path.stem + "_summary.txt"
+        output_path = GENERATED_DIR / output_name
+        write_summary(output_path, all_summaries)
+        print(f"\n[run_summary_once] Wrote summary file: {output_path}")
+    else:
+        print("\n[run_summary_once] --no-write flag set; no summary file created.")
+
+
+if __name__ == "__main__":
+    main()
+
+
+---
+
+How to smoke test this
+
+1. Drop a test workbook into:
+
+
+
+Summaries/Input/test_status.xlsx
+
+Even a tiny one with:
+
+Sheet1: columns like Task, Status, Owner
+
+A couple rows of data
+
+
+2. From repo root:
+
+
+
+python run_summary_once.py
+
+You should see:
+
+It picks test_status.xlsx from Summaries/Input.
+
+Prints sheet names.
+
+Prints row/column counts and column headers.
+
+Creates something like:
+
+
+Summaries/Generated/test_status_summary.txt
+
+3. If you only want console output:
+
+
+
+python run_summary_once.py --no-write
+
+
+---
+
+How this lines up with your earlier 4-step plan
+
+1. ✅ Create Summaries folders
+Already done and the script expects those exact paths.
+
+
+2. ✅/🔄 Check for GPT helpers
+None found, so this script is self-contained and has zero API logic.
+
+
+3. ✅ Create run_summary_once.py
+That is what you have above. Drop it in and commit.
+
+
+4. 🔄 Smoke test
+Run it on a tiny .xlsx and confirm headers show as expected.
+
+
+
+Once that works, we can bolt on:
+
+A summarize_text_with_gpt() stub that later calls your actual GPT helper.
+
+Logic to read a specific sheet like Case_Master_Action_Plan and emit more structured summaries instead of just structural info.
+
+
+If you want, next round I can refactor this into:
+
+summaries/config.py
+
+summaries/run_summary_once.py
+
+plus a clean interface that your Pro Se pipeline can call directly.

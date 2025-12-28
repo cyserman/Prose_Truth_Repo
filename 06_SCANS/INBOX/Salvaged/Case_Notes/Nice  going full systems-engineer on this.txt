@@ -1,0 +1,135 @@
+Nice, going full systems-engineer on this ⚙️📂
+
+Here’s #2: CSV-style evidence checklist built straight from the themes we outlined. You can copy this into a .csv file and open it in Sheets/Excel/DeX-friendly editor.
+
+
+---
+
+1. Column layout (header row)
+
+Use this as your first line:
+
+Evidence_ID,Theme,Subtheme,Issue_Category,Description,Suggested_File_Name,Source_Type,Linked_Motion_or_Issue,Priority,Status,Notes
+
+Column meanings (quick):
+
+Evidence_ID → Short unique code (e.g. CUST-001, SAFE-003).
+
+Theme → Big bucket (Custody, Safety, Financial, Property, Credibility, Procedural).
+
+Subtheme → More specific (Alienation, Gambling, DVR, Cohabitation, etc.).
+
+Issue_Category → Custody / Safety / Property / Support / Credibility / Procedure.
+
+Description → Human-readable description.
+
+Suggested_File_Name → How you’d name the actual file on disk.
+
+Source_Type → Bank record, Text screenshot, PI log, Kids statement log, Court doc, etc.
+
+Linked_Motion_or_Issue → Custody_Mod, APL, Safety_Eval, Discovery, Property_Split, Future_Praecipe_Attack.
+
+Priority → High / Medium / Low.
+
+Status → To_Collect / Collected / Organized / Used_in_Filing.
+
+Notes → Anything tactical (who, when, where).
+
+
+
+---
+
+2. Sample rows for your main themes
+
+You can paste this under the header row and then customize / expand:
+
+Evidence_ID,Theme,Subtheme,Issue_Category,Description,Suggested_File_Name,Source_Type,Linked_Motion_or_Issue,Priority,Status,Notes
+CUST-001,Custody,Contact Interference,Custody,"Call log showing repeated missed/ignored calls to children over several months","CUST-001_2024-01-01_to_2024-06-30_call_log_children.pdf","Phone/Carrier Log","Custody_Mod",High,To_Collect,"Export from phone provider or device; highlight dates just before/after key disputes"
+CUST-002,Custody,Contact Interference,Custody,"Screenshots of messages where Wife denies or cuts off phone/video access to children","CUST-002_2024-03-15_texts_denied_calls.png","Screenshot/Text Thread","Custody_Mod",High,Collected,"Crop out irrelevant personal chatter; keep tone of your messages calm and neutral"
+CUST-003,Custody,Information Blocking,Custody,"Messages where Wife refuses to share school or activity information","CUST-003_2024-04-10_texts_school_info_blocked.pdf","Screenshot/Text Thread","Custody_Mod",High,To_Collect,"Useful to show pattern that you ask reasonable questions; she stonewalls"
+CUST-004,Custody,Gatekeeping Log,Custody,"Chronological log of all attempts to contact children and outcomes","CUST-004_2024-01-01_to_2024-12-31_contact_log.csv","Self-Created Log","Custody_Mod",High,Organized,"Keep entries short and factual; this becomes your backbone exhibit"
+
+SAFE-001,Safety,Ricky Criminal Record,Safety,"Certified or printed criminal docket sheets showing violent/serious convictions for Ricky","SAFE-001_YYYY-MM-DD_Ricky_criminal_docket.pdf","Public Record","Safety_Eval",High,To_Collect,"Try to get official court printouts or online docket PDFs if available"
+SAFE-002,Safety,Cohabitation Pattern,Safety,"Photos/logs showing Ricky's car regularly at marital residence overnight and early morning","SAFE-002_2024-08-01_to_2024-08-15_vehicle_presence_log.pdf","PI Log/Observation Log","Safety_Eval",Medium,To_Collect,"If using PI, limit to specific windows to control cost"
+SAFE-003,Safety,Household Composition,Safety,"Evidence Wife and Ricky function as co-residents (mail, packages, shared items at address)","SAFE-003_2024-07-20_mail_to_Ricky_at_marital_home.pdf","Photo/Scan","Safety_Eval",Medium,To_Collect,"Even a few strong pieces > 100 random photos"
+SAFE-004,Safety,Pregnancy Context,Safety,"Photos or observations showing Wife visibly pregnant, plus any baby cards/items suggesting new baby in household","SAFE-004_2024-xx-xx_pregnancy_and_baby_items.pdf","Photo/Observation Log","Safety_Eval",Medium,To_Collect,"Don't go creepy; you're documenting household change, not stalking"
+
+FIN-001,Financial,Gambling – Venmo/Bank,Support,"Bank/Venmo statements showing withdrawals linked to gambling service (FanDuel etc.)","FIN-001_2023-11-01_to_2024-01-31_Venmo_gambling_transactions.pdf","Bank/Venmo Statement","Support,Property_Split,Credibility",High,Collected,"Highlight transactions; note dates and sudden balance drops"
+FIN-002,Financial,Gambling – Mail Evidence,Credibility,"USPS informed delivery or physical mail linking Wife to gambling account","FIN-002_2024-01-15_gambling_mailer_scan.pdf","Photo/Scan","Credibility,Support",Medium,Collected,"Pair with her prior denial for maximum impact"
+FIN-003,Financial,Marital Home Payments,Property,"History showing you paid mortgage and core housing expenses for years","FIN-003_2018-01-01_to_2023-12-31_mortgage_history.pdf","Bank Statement/Mortgage Statement","Property_Split,APL",High,To_Collect,"Try to create one summary page + backup docs"
+FIN-004,Financial,One-Time Mortgage Payment,Property,"Evidence Wife made a single mortgage payment around time you were removed","FIN-004_2024-xx-xx_wife_single_mortgage_payment.pdf","Bank/Mortgage Record","Property_Split,Credibility",Medium,To_Collect,"Supports the 'manufactured status quo' story"
+
+PROP-001,Property,Marital Home Status,Property,"Timeline showing your removal from the home and Wife's continued exclusive occupancy","PROP-001_2024-xx-xx_marital_home_timeline.pdf","Timeline Summary","Property_Split,Custody_Mod",High,Organized,"Simple timeline: who lived where and when"
+PROP-002,Property,Equity Stake,Property,"Rough calculation of equity in marital home (~$250k per your estimate)","PROP-002_YYYY-MM-DD_home_equity_estimate.xlsx","Self-Created Spreadsheet","Property_Split,APL",Medium,To_Collect,"Doesn't need to be perfect; it's a directional number for now"
+
+EVID-001,Evidence,DVR System – Existence,Discovery,"Description of 5TB multi-camera DVR system you installed at Wife's request","EVID-001_2023-xx-xx_DVR_installation_summary.pdf","Self-Written Summary","Discovery,Safety_Eval,Credibility",High,Organized,"Note camera locations, recording capacity, who controls it now"
+EVID-002,Evidence,DVR System – Preservation,Discovery,"Letter/email/text requesting preservation of DVR footage for specific dates/times","EVID-002_2024-xx-xx_DVR_preservation_request.pdf","Letter/Email","Discovery,Credibility",High,To_Collect,"Very important: shows you flagged this early; helps if footage later 'disappears'"
+EVID-003,Evidence,DVR Potential Content,Discovery,"List of key date ranges where DVR footage would likely show Ricky at residence","EVID-003_DVR_relevant_date_ranges.csv","Self-Created List","Discovery,Safety_Eval",Medium,Organized,"E.g. 'Week of 2024-05-10 – observed him leaving for work'"
+
+KIDS-001,Custody,Children Statements,Custody,"Log of children's spontaneous statements about Ricky and the baby (no coaching, just recording)","KIDS-001_2024-xx-xx_children_spontaneous_statements_log.pdf","Self-Created Log","Custody_Mod,Safety_Eval",Medium,Organized,"Keep extremely neutral: date/time, exact words, no commentary"
+KIDS-002,Custody,Children Relationship Context,Custody,"Notes on your historical involvement (bedtime, homework, activities) to counter 'he was never around' narrative","KIDS-002_2015-2023_parenting_role_summary.pdf","Self-Written Summary","Custody_Mod",Medium,To_Collect,"Short, factual, 1–2 pages max"
+
+COMM-001,Credibility,Gambling Denial vs Evidence,Credibility,"Screenshot/text where Wife denies knowledge of gambling account, contrasted with mail/transactions","COMM-001_2024-01-10_wife_denial_vs_mailer.pdf","Screenshot Bundle","Credibility",High,To_Collect,"One clean comparison exhibit > 20 messy screenshots"
+COMM-002,Credibility,Ricky Denial vs Cohabitation,Credibility,"Messages where Wife downplays or denies Ricky's presence compared to vehicle logs, pregnancy, etc.","COMM-002_2024-xx-xx_ricky_denial_vs_evidence.pdf","Screenshot/PI Combo","Credibility,Safety_Eval",High,To_Collect,"Goal is to show pattern, not humiliate"
+
+PROC-001,Procedural,Praecipe/Waiver,Procedure,"Copy of the praecipe/waiver/non-contest document you signed that you're concerned about","PROC-001_YYYY-MM-DD_praecipe_waiver_signed.pdf","Court Document","Future_Praecipe_Attack",Medium,Collected,"Flag for future attorney review; do NOT make this your main DIY battleground right now"
+PROC-002,Procedural,Court Orders Timeline,Procedure,"Timeline of major court orders and filings in divorce and custody cases","PROC-002_2019-YYYY_court_orders_timeline.csv","Timeline Summary","Custody_Mod,Property_Split,Support",Medium,Organized,"Helps any judge or lawyer get oriented fast"
+
+
+---
+
+3. How to actually use this without going insane
+
+1. Start small:
+Don’t try to fill every row at once. Start with:
+
+CUST-004 (contact log)
+
+FIN-003 (mortgage history)
+
+SAFE-001 (Ricky criminal record)
+
+EVID-001 + EVID-002 (DVR)
+
+
+
+2. Treat Linked_Motion_or_Issue like a routing tag:
+
+When you’re drafting a custody motion, you can filter on Custody_Mod.
+
+When you move to APL, filter APL or Support.
+
+When a lawyer finally enters the chat, you can hand them filtered views.
+
+
+
+3. Use Status brutally honestly:
+
+To_Collect → you don’t have it, stop pretending you do.
+
+Collected → it exists, somewhere in your folders.
+
+Organized → it’s named per the CSV and in the right place.
+
+Used_in_Filing → it has already been deployed in court.
+
+
+
+4. Don’t overshoot with volume: Judges and future-counsel will love:
+
+10–20 clean, labeled, high-impact exhibits
+way more than
+
+500 screenshots in a digital shoebox.
+
+
+
+
+
+---
+
+If you want next, I can:
+
+Strip this down into a minimal “Custody_Mod only” CSV, or
+
+Help you map these Evidence_IDs directly into your existing sticky_index.json / timeline structure so your tools and this spreadsheet speak the same language.

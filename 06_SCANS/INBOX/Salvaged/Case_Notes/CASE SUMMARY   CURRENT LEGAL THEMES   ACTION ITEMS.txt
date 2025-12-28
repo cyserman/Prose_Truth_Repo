@@ -1,0 +1,148 @@
+CASE SUMMARY – CURRENT LEGAL THEMES & ACTION ITEMS (NON-ATTORNEY, NON-LEGAL ADVICE)
+
+I. CORE FACT PATTERN (HIGH-LEVEL)
+
+1. Marital Residence / Property
+   - Long-term marital home with approximately ~$250k in equity (per your description).
+   - You paid the mortgage and other housing-related costs for years while Wife was not employed.
+   - Shortly before/around the time you were removed from the home, Wife made one mortgage payment and then excluded you from the residence.
+   - Current fear: Wife attempting to establish a "new status quo" in both custody and property, claiming near-100% control.
+
+2. Procedural History – Divorce / Praecipe / Waiver Concern
+   - At some stage, you signed a document (likely a praecipe, waiver, or non-contest form) that you now fear:
+     - may waive or limit your ability to contest aspects of the divorce or economic claims, and/or
+     - may withdraw certain objections.
+   - You did not fully understand the consequences at the time and now wish to know if it can be set aside.
+   - Realistic view: setting aside such documents is possible only in limited circumstances (fraud, duress, serious misunderstanding, etc.) and is usually an uphill, technical battle that is best handled with counsel.
+   - Strategic takeaway: treat “undoing” that paper as a long-term, lawyer-driven task, not the first priority for your pro se energy.
+
+3. Custody / Access / Alienation
+   - Current situation:
+     - Severely limited contact with your children.
+     - Alleged gatekeeping and alienation (calls restricted, “none of your business” on schooling/activities, etc.).
+     - Concern that Wife is pushing a narrative of a new “status quo” with you mostly or entirely out of the picture.
+   - You have evidence of:
+     - Missed or blocked contact,
+     - Dismissive responses about your right to know their schooling/activities,
+     - Patterns that suggest intentional erosion of your role.
+
+4. Ricky (Partner with Criminal History) & Pregnancy
+   - Wife is in a relationship with “Ricky,” who reportedly has violent or serious criminal convictions.
+   - There is strong circumstantial evidence:
+     - She may be ~7 months pregnant with his child at the time of an upcoming court event.
+     - Kids are talking about a “new baby sister.”
+     - Visible pregnancy and congratulatory cards in the home.
+   - She is denying or minimizing the relationship to you, but reportedly talking about it to others.
+   - Safety and stability concerns:
+     - Presence of a convicted violent offender in the home,
+     - Permanent addition to the household (new baby),
+     - Impact on the children’s environment and caregiving.
+
+5. Video Surveillance System (5TB DVR)
+   - You installed a multi-camera surveillance system at Wife’s request shortly before you were removed.
+   - System:
+     - Multiple cameras covering entrances/common areas.
+     - Approximately 5TB DVR in the basement, always running.
+     - Wife has exclusive control/possession since your removal.
+   - Legal relevance:
+     - Could show who actually lives there (cohabitation with Ricky),
+     - Could document comings/goings related to safety issues.
+   - Even if footage is never produced, the existence of a large-capacity DVR under her control supports:
+     - a duty to preserve evidence,
+     - credibility issues if footage is “unavailable” or “lost.”
+
+6. Financial Misconduct / Gambling (FanDuel / Venmo)
+   - Venmo account was drained in connection with a FanDuel-type gambling account.
+   - Wife denied knowledge of the service, but:
+     - USPS informed delivery shows a physical mailer addressed to her (or your household) linking her to that gambling account.
+   - Evidence category:
+     - Financial dissipation / misuse of funds.
+     - Credibility (denying knowledge while circumstantial evidence suggests involvement).
+
+7. PI (Private Investigator) – Cohabitation Evidence
+   - You are considering hiring a local PI to:
+     - Document Ricky’s car regularly at Wife’s residence,
+     - Capture him leaving the house for work in the morning and returning after work on multiple days.
+   - Goal:
+     - Show a pattern consistent with cohabitation (overnight presence + repeated comings/goings).
+   - This is “nice-to-have, not must-have”:
+     - Your case is already supported by documents, logs, pregnancy, DVR, kids’ statements, and criminal history.
+     - PI should be used surgically with a capped budget and clear instructions.
+
+------------------------------------------------------------
+II. LIKELY MOTIONS / RELIEF YOU ARE POSITIONING FOR (PENNSYLVANIA FAMILY COURT CONTEXT)
+
+NOTE: Exact titles/forms depend on local rules; this is conceptual.
+
+1. Custody Modification Motion
+   - Purpose:
+     - Change the current custody order based on:
+       - Denied or severely limited access,
+       - Alienation/gatekeeping,
+       - Safety concerns relating to Ricky and the new household structure,
+       - Significant change in circumstances (new partner, new baby, etc.).
+   - Key requested relief (examples):
+     - A more balanced or defined physical/legal custody schedule.
+     - Regular, protected phone/video contact with the children.
+     - Conditions to protect the children from exposure to unsafe situations (e.g., restrictions on Ricky’s unsupervised time with the kids).
+
+2. Safety / Risk Evaluation Related to Ricky
+   - Purpose:
+     - Ask the court to evaluate risk factors associated with a convicted violent offender who is functionally in the children’s household.
+   - Possible requests:
+     - A custody evaluation or risk assessment that includes review of Ricky’s criminal history.
+     - Limitations or conditions on Ricky’s contact:
+       - No unsupervised contact,
+       - No overnights,
+       - Or contact only under specified terms until risk is evaluated.
+     - Orders requiring disclosure of:
+       - Who resides in the home,
+       - Any criminal background related to household members.
+
+3. APL – Alimony Pendente Lite (or Similar Support)
+   - Purpose:
+     - Temporary financial support while the divorce is pending, so you can maintain stability and litigate.
+   - Basis:
+     - You were the primary/consistent payer of housing and family expenses during the marriage.
+     - You are now out of the house and financially strained.
+     - Wife has access to the house, possible additional support from Ricky, and potentially other financial resources.
+
+4. Bifurcation of Issues
+   - Purpose:
+     - Separate the divorce into distinct tracks:
+       - Divorce status,
+       - Economic issues (property, support),
+       - Custody.
+   - Goal:
+     - Prevent your financial issues from being frozen indefinitely while custody drama and delays continue.
+     - Allow the court to address critical financial disparities and support in parallel with custody.
+
+5. Discovery / Preservation Requests
+   - Even if not a separate motion initially, your filings and later discovery can:
+     - Request preservation and production of:
+       - DVR footage from the 5TB system for specific relevant dates,
+       - Financial records (Venmo, bank accounts, FanDuel/gambling records),
+       - Communications that show cohabitation or household structure.
+     - Put on record:
+       - That such evidence exists (or existed),
+       - That Wife has control over it,
+       - That you have explicitly asked that it be preserved.
+
+6. Future Possible Motion – Set Aside / Open Prior Order (Praecipe Issue)
+   - Concept:
+     - Attempt to undo or modify a prior waiver or praecipe if evidence shows you signed without understanding, or under duress/misrepresentation.
+   - Realistic assessment:
+     - Complex, technical, and higher risk.
+     - Typically better attempted with a lawyer after active custody/support issues are stabilized.
+     - Priority: low for immediate pro se action; preserve it as a “later with counsel” project.
+
+------------------------------------------------------------
+III. EVIDENCE THEMES & HOW THEY SUPPORT COURT INTERVENTION
+
+1. Not “Just Your Word vs Hers” – Corroboration You Already Have or Can Get
+
+   a) Objective Records
+      - Ricky’s criminal record (public records).
+      - Venmo and bank statements showing withdrawals.
+      - USPS informed delivery / gambling-related mailers.
+      - Call logs, message logs

@@ -1,0 +1,2 @@
+source_pdf,source_abs,page_count,avg_confidence,low_conf_pages,sha256,searchable_pdf,annotated_searchable_pdf,user_notes_annotated_pdf,notes_present,notes_pending_count,tag,trust_weight,exhibit_id,exhibit_filename,sidecar_path,processed_at
+sample_evidence.pdf,,1,,,79587c7858fe7b67d929fe126da3fdd0a0c14b04ab94ec08703828fdb9bd35d3,,,,,,input_case,0.9,,,/home/ezcyser/ProSe-File-Organizer-/out_single/sample_evidence_sidecar.json,2025-11-07T06:08:23.105503Z

@@ -1,0 +1,191 @@
+✅ Checkpoint logged, captain. ProSe engine + Voice Code Coach are officially online.
+
+Here’s what you’ve got running right now:
+
+
+---
+
+🧩 Current State (Solid Baseline)
+
+Core engine
+
+start_prose.py watcher:
+
+Watches ~/Projects/_INBOX
+
+Copies files into ~/Projects/ProSe/inputs/
+
+For PDFs, runs:
+
+batch_enhanced.py --input inputs --out out
+
+judge_timeline_pdf.py --out out --timeline out/timeline.csv --pdf out/judge_timeline.pdf
+(only if out/timeline.csv exists)
+
+
+Auto-commits & pushes via git_sync.
+
+
+
+Stability / Safety
+
+Bad/empty PDFs:
+
+Logged clearly
+
+Skipped
+
+No batch crash
+
+
+judge_timeline_pdf.py only runs if out/timeline.csv exists.
+
+ocr_processor.py now uses prose_core.pdf_utils:
+
+open_pdf_safe
+
+sha256_file
+
+
+The pipeline is robust enough for “real use,” not just tinkering.
+
+
+Shared “brain stem”
+
+prose_core/:
+
+pdf_utils.py (open PDF safely, hash files)
+
+sidecar.py (read/write JSON with schema_version)
+
+timeline.py (consistent timeline.csv writer)
+
+
+This is the hook point for bringing in ProSe3.5 / original PSFO behavior later without spaghetti.
+
+
+Voice Code Coach
+
+voice_code_coach.py running at http://localhost:5002
+
+Confirmed working via:
+
+curl -s \
+  -H "Content-Type: application/json" \
+  -d '{"path":"start_prose.py","start_line":1,"end_line":120}' \
+  http://localhost:5002/api/v1/explain
+
+It can now:
+
+Explain code in this repo
+
+Propose refactors via diff
+
+Generate basic tests
+
+Search symbols (if rg available)
+
+
+
+This is a legit integrated system now: file pipeline + git + code-aware helper.
+
+
+---
+
+🎛 Menu of “Next Toys” (pick one later)
+
+When you’re ready to un-pause, here are clean next moves:
+
+1. Add safe apply_patch endpoint
+
+Endpoint: /api/v1/apply_patch
+
+Does:
+
+create branch voice/refactor/<timestamp>
+
+apply unified diff
+
+commit
+
+log before/after HEAD SHA + file list
+
+
+Only runs when confirm: true is passed.
+
+This turns your coach from “advisor” → “surgical robot with safety harness.”
+
+
+
+2. Deeper ProSe3.5 / PSFO integration
+
+Use prose_core as the adapter layer.
+
+Bring over:
+
+better sidecar schema
+
+smarter timeline extraction rules
+
+any specialized doc-handling you liked in 3.5.
+
+
+The goal: old power, new stability.
+
+
+
+3. UX & cleanup
+
+Auto-move processed inputs to inputs/processed/ or _INBOX/processed/ (some of this is already started).
+
+Nicer folder structure:
+
+scripts/, docs/, engine/
+
+
+Tiny CLI helpers:
+
+./run_timeline_once.py
+
+./dump_status.py (show inbox, inputs, out summary)
+
+
+
+
+4. Make the agent “ProSe-aware”
+
+Feed it:
+
+README_quickstart.md
+
+INTEGRATION_STRATEGY.md
+
+BOT_AGENT_INSTRUCTIONS.txt
+
+
+So it talks in terms of _INBOX → inputs → out, timelines, sidecars, etc.
+
+
+
+
+
+---
+
+If you want to stop here, you’re at a clean checkpoint:
+
+Repo is sane
+
+Chromebook isn’t screaming
+
+Pipeline works
+
+Voice API works
+
+
+Next time you say “go,” tell me which thing you want to power up:
+
+> apply_patch, ProSe3.5 integration, cleanup, or agent brain upgrade
+
+
+
+and I’ll treat that as the next mission. 🚀

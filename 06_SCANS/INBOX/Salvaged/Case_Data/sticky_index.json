@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sticky-2024-03-10-sunday-call",
+    "title": "Wife blocked Sunday call",
+    "category": "custody",
+    "date": "2024-03-10",
+    "tags": ["calls", "blocked", "alienation"],
+    "evidence_ids": ["CUST-002", "CUST-004"],
+    "notes": "Use when arguing pattern of contact interference."
+  },
+  {
+    "id": "sticky-2024-06-01-kids-mention",
+    "title": "Kids mention baby sister",
+    "category": "custody",
+    "date": "2024-06-01",
+    "tags": ["kids", "statements"],
+    "evidence_ids": ["KIDS-001"],
+    "notes": "Record exact phrasing; neutral tone."
+  },
+  {
+    "id": "sticky-2024-05-05-vehicle-overnight",
+    "title": "Ricky vehicle overnight at marital home",
+    "category": "custody",
+    "date": "2024-05-05",
+    "tags": ["vehicle", "cohabitation"],
+    "evidence_ids": ["SAFE-002"],
+    "notes": "One data point toward cohabitation pattern."
+  }
+]

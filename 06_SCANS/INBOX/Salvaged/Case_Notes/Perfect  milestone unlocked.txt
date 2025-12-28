@@ -1,0 +1,191 @@
+Perfect, milestone unlocked 🧩
+
+Since Custody_Mod_Evidence.csv is in place, here’s that Python lint script to keep everything in sync.
+
+
+---
+
+1. Save this as lint_evidence_links.py (repo root)
+
+#!/usr/bin/env python3
+"""
+lint_evidence_links.py
+
+Sanity-checks consistency between:
+- Custody_Mod_Evidence.csv
+- sticky_index.json
+- timeline.csv
+
+It verifies:
+- All Evidence_IDs used in stickies/timeline exist in the CSV
+- Which Evidence_IDs in the CSV aren't referenced yet (FYI only)
+"""
+
+import csv
+import json
+from pathlib import Path
+import sys
+
+# Default layout; adjust if needed
+DEFAULT_BASE = Path("my_real_case")
+DEFAULT_CSV = DEFAULT_BASE / "Custody_Mod_Evidence.csv"
+DEFAULT_STICKIES = DEFAULT_BASE / "sticky_index.json"
+DEFAULT_TIMELINE = DEFAULT_BASE / "timeline.csv"
+
+
+def load_evidence_ids_from_csv(csv_path: Path) -> set:
+    if not csv_path.exists():
+        print(f"❌ Evidence CSV not found: {csv_path}")
+        return set()
+
+    ids = set()
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        if "Evidence_ID" not in reader.fieldnames:
+            print(f"❌ 'Evidence_ID' column not found in {csv_path}")
+            return set()
+
+        for row in reader:
+            eid = (row.get("Evidence_ID") or "").strip()
+            if eid:
+                ids.add(eid)
+    return ids
+
+
+def load_evidence_ids_from_stickies(sticky_path: Path) -> set:
+    ids = set()
+    if not sticky_path.exists():
+        print(f"⚠ No sticky_index.json found at: {sticky_path}")
+        return ids
+
+    try:
+        data = json.loads(sticky_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        print(f"❌ JSON error in {sticky_path}: {e}")
+        return ids
+
+    if not isinstance(data, list):
+        print(f"⚠ Expected a list of stickies in {sticky_path}, got {type(data)}")
+        return ids
+
+    for sticky in data:
+        e_list = sticky.get("evidence_ids") or []
+        if isinstance(e_list, list):
+            for eid in e_list:
+                eid = (str(eid) or "").strip()
+                if eid:
+                    ids.add(eid)
+        elif isinstance(e_list, str):
+            # fallback if stored as "CUST-001;CUST-004"
+            for eid in e_list.split(";"):
+                eid = eid.strip()
+                if eid:
+                    ids.add(eid)
+    return ids
+
+
+def load_evidence_ids_from_timeline(timeline_path: Path) -> set:
+    ids = set()
+    if not timeline_path.exists():
+        print(f"⚠ No timeline.csv found at: {timeline_path}")
+        return ids
+
+    with timeline_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        if "Evidence_IDs" not in reader.fieldnames:
+            print(f"⚠ 'Evidence_IDs' column not found in {timeline_path}")
+            return ids
+
+        for row in reader:
+            field = (row.get("Evidence_IDs") or "").strip()
+            if not field:
+                continue
+            for eid in field.split(";"):
+                eid = eid.strip()
+                if eid:
+                    ids.add(eid)
+    return ids
+
+
+def main(
+    base: Path = DEFAULT_BASE,
+    csv_path: Path = DEFAULT_CSV,
+    sticky_path: Path = DEFAULT_STICKIES,
+    timeline_path: Path = DEFAULT_TIMELINE,
+) -> int:
+    print(f"🔍 Base directory: {base.resolve()}")
+    print(f"   Evidence CSV:   {csv_path}")
+    print(f"   Stickies JSON:  {sticky_path}")
+    print(f"   Timeline CSV:   {timeline_path}")
+    print()
+
+    evidence_ids = load_evidence_ids_from_csv(csv_path)
+    sticky_ids = load_evidence_ids_from_stickies(sticky_path)
+    timeline_ids = load_evidence_ids_from_timeline(timeline_path)
+
+    print(f"📑 Evidence IDs in CSV:       {len(evidence_ids)}")
+    print(f"🗒  Evidence IDs in stickies:  {len(sticky_ids)}")
+    print(f"🕒 Evidence IDs in timeline:  {len(timeline_ids)}")
+
+    if not evidence_ids:
+        print("\n❌ No Evidence_IDs loaded from CSV. Fix that first.")
+        return 1
+
+    unknown_in_stickies = sticky_ids - evidence_ids
+    unknown_in_timeline = timeline_ids - evidence_ids
+
+    if unknown_in_stickies:
+        print("\n⚠ Evidence_IDs referenced in stickies but NOT in CSV:")
+        for eid in sorted(unknown_in_stickies):
+            print(f"  - {eid}")
+
+    if unknown_in_timeline:
+        print("\n⚠ Evidence_IDs referenced in timeline but NOT in CSV:")
+        for eid in sorted(unknown_in_timeline):
+            print(f"  - {eid}")
+
+    unused_evidence = evidence_ids - sticky_ids - timeline_ids
+    if unused_evidence:
+        print("\nℹ Evidence_IDs defined in CSV but not referenced yet (this is fine, just FYI):")
+        for eid in sorted(unused_evidence):
+            print(f"  - {eid}")
+
+    if not unknown_in_stickies and not unknown_in_timeline:
+        print("\n✅ All referenced Evidence_IDs exist in the CSV. Links look consistent.")
+
+    return 0
+
+
+if __name__ == "__main__":
+    # Allow override base dir: `python lint_evidence_links.py my_mixed_case/`
+    if len(sys.argv) > 1:
+        base_dir = Path(sys.argv[1])
+        base = base_dir
+        csv_path = base / "Custody_Mod_Evidence.csv"
+        sticky_path = base / "sticky_index.json"
+        timeline_path = base / "timeline.csv"
+        raise SystemExit(main(base, csv_path, sticky_path, timeline_path))
+    else:
+        raise SystemExit(main())
+
+
+---
+
+2. How to run it
+
+From repo root:
+
+python lint_evidence_links.py
+
+Or, to point at a different case folder (like my_mixed_case/):
+
+python lint_evidence_links.py my_mixed_case/
+
+Fix anything it flags as:
+
+“referenced in stickies/timeline but NOT in CSV” → typo / missing row.
+
+The “defined in CSV but not referenced yet” list is just informational.
+
+
+Once that’s clean, you’ve got a consistent ID universe. Then you’ve earned your breather 😅🧠
