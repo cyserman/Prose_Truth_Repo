@@ -1,5 +1,10 @@
 # ⚖️ PRO SE LEGAL DB (The Truth Repo)
 
+![Release](https://img.shields.io/github/v/release/cyserman/Prose_Truth_Repo?include_prereleases&color=blue)
+![Build](https://github.com/cyserman/Prose_Truth_Repo/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Accessibility](https://img.shields.io/badge/WCAG-2.1%20AA-brightgreen)
+
 **Case:** Firey v. Firey  
 **Jurisdiction:** Montgomery County, PA  
 **Status:** Litigation Mode
@@ -119,17 +124,72 @@ python 09_APP/agents/orchestrator.py
 4. Runs `npm install`
 5. Launches dev server
 
+**Usage:**
+```bash
+# Always start with dry-run
+./restore_christine.sh --dry-run
+
+# Run with automatic backups
+./restore_christine.sh --backup-dir ./backups/manual-$(date +%Y%m%d)
+
+# Run without confirmations (use with caution)
+./restore_christine.sh --yes
+
+# Show help
+./restore_christine.sh --help
+```
+
+**Safety Features:**
+- ✅ `--dry-run` mode (preview changes)
+- ✅ Automatic backups before destructive operations
+- ✅ Comprehensive logging
+- ✅ Preflight checks (validates environment)
+- ✅ Confirmation prompts (unless `--yes`)
+- ✅ Auto-detects repository root
+- ✅ Error handling with exit codes
+
 **Safety Notes:**
 - Requires `sudo` for apt operations
-- Runs automatically without prompts
-- Exits on any failure
+- Always run `--dry-run` first
+- Backups created automatically in `backups/` directory
+- Logs saved to `logs/` directory
 - Review script before first run
 
-**Future Improvements:**
-- Add `--dry-run` flag
-- Add `--help` documentation
-- Add error recovery
-- Add operation logging
+**Interpreting Logs:**
+- Logs are stored in `logs/restore-YYYYMMDD-HHMMSS.log`
+- Look for `[DRY RUN]` markers to identify preview-only operations
+- `[CMD]` entries show actual commands executed
+- Check for `✅` success markers or `❌` error markers
+- Preflight check results are logged at the start
+
+**Artifacts Storage:**
+- **Backups**: `backups/YYYYMMDD-HHMMSS/` (package.json, package-lock.json, etc.)
+- **Logs**: `logs/restore-YYYYMMDD-HHMMSS.log`
+- **CI Artifacts**: GitHub Actions uploads logs and backups as workflow artifacts
+- **Test Results**: Bats test output in CI logs
+
+**Rollback / Remediation Steps:**
+1. **If script fails mid-execution:**
+   - Check logs: `tail -50 logs/restore-*.log`
+   - Restore from backup: `cp backups/LATEST/package.json 09_APP/prose-legal-db-app/`
+   - Manual recovery: `cd 09_APP/prose-legal-db-app && npm install`
+
+2. **If data is lost:**
+   - Check localStorage exports (if exported)
+   - Check Git history: `git log --all --full-history -- "*.csv"`
+   - Restore from backups directory
+
+3. **If application won't start:**
+   - Clear node_modules: `rm -rf node_modules && npm install`
+   - Check port availability: `lsof -i :5173`
+   - Review dev server logs
+
+**See Also:**
+- [docs/RUNBOOK.md](./docs/RUNBOOK.md) - Detailed recovery procedures and operational guide
+- [docs/METRICS.md](./docs/METRICS.md) - Metrics tracking guide
+- [SECURITY.md](./SECURITY.md) - Security policies and secrets handling
+- [RELEASES.md](./RELEASES.md) - Release procedures and versioning
+- [CHANGELOG.md](./CHANGELOG.md) - Change history
 
 ## AI PRIME DIRECTIVE
 

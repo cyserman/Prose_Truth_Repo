@@ -57,6 +57,23 @@ Closes #<!-- issue number -->
 
 <!-- Add screenshots for UI changes -->
 
+## Artifacts to Attach
+
+- [ ] shellcheck report
+- [ ] bats test results
+- [ ] .secrets.baseline (if updated)
+- [ ] smoke-run logs (dry-run)
+- [ ] Updated README.md
+- [ ] Updated RUNBOOK.md (if applicable)
+- [ ] trufflehog output (if non-sensitive)
+
+## Safety & Backup Rules
+
+- [ ] Backups created before any write/destructive operation
+- [ ] Default backup location: `backups/YYYYMMDD-HHMMSS`
+- [ ] No force-push to shared branches without approval
+- [ ] History rewrites documented with "⚠ Backup required before execution"
+
 ## Additional Notes
 
 <!-- Any additional information for reviewers -->
@@ -68,3 +85,4 @@ Closes #<!-- issue number -->
 - Secrets scan must be clean
 - All tests must pass
 - Review SECURITY.md for secrets handling
+- Always create backups before destructive operations

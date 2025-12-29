@@ -9,6 +9,31 @@
 - **Repository Maintainer**: [Your Contact]
 - **GitHub Issues**: https://github.com/cyserman/Prose_Truth_Repo/issues
 - **Security Issues**: Use GitHub Security Advisories (private)
+- **Emergency Escalation**: Create issue with `[URGENT]` label
+
+## 📊 Metrics Tracking
+
+### Monthly Metrics
+
+Track the following metrics monthly:
+
+- **Dry-run runs**: Number of `--dry-run` executions
+- **Real runs**: Number of actual executions (non-dry-run)
+- **Failures**: Number of failed runs requiring remediation
+- **Time to recover**: Average time from failure detection to resolution
+- **Success rate**: (Real runs - Failures) / Real runs
+
+### Recording Metrics
+
+1. **After each run**: Update metrics in issue or tracking document
+2. **Monthly review**: Create issue using post-mortem template
+3. **Quarterly review**: Analyze trends and update procedures
+
+### Metrics Storage
+
+- **CI/CD Metrics**: GitHub Actions workflow runs
+- **Manual Runs**: Document in monthly review issue
+- **Historical Data**: Maintain in `.copilot-tracking/metrics/` (if created)
 
 ---
 
@@ -383,6 +408,7 @@ git log --oneline -10
 - [README.md](../README.md) - Technical overview
 - [SECURITY.md](../SECURITY.md) - Security policies
 - [RELEASES.md](../RELEASES.md) - Release procedures
+- [METRICS.md](./METRICS.md) - Metrics tracking guide
 
 ---
 

@@ -66,7 +66,7 @@ git push origin v1.0-alpha
 - [ ] Go to **Releases** → **Draft new release**
 - [ ] Select tag: `v1.0-alpha`
 - [ ] Title: `ProSe Legal DB v1.0-alpha`
-- [ ] Description: Copy from `RELEASE_ANNOUNCEMENT.md`
+- [ ] Description: Copy from `RELEASE_NOTES.md`
 - [ ] Check **"Pre-release"** checkbox
 - [ ] Click **"Publish release"**
 
@@ -78,15 +78,10 @@ git push origin v1.0-alpha
   - [ ] Accessibility workflow
 - [ ] Check for any failures
 
-### 3. Add Badges to README
-- [ ] Copy badge section from `README_BADGES.md`
-- [ ] Add to top of `README.md`
-- [ ] Commit and push:
-  ```bash
-  git add README.md
-  git commit -m "docs: add status badges to README"
-  git push origin main
-  ```
+### 3. Verify Badges in README
+- [x] Badges already added to `README.md` (completed)
+- [ ] Verify badges display correctly on GitHub
+- [ ] Note: Badges will update automatically after first release and CI run
 
 ### 4. Enable Dependabot (Optional)
 - [ ] Go to **Settings** → **Security** → **Dependabot alerts**

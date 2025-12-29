@@ -117,6 +117,36 @@
   - JSON trigger for watcher
   - Timeline integration
 
+### Floating Evidence Console
+- ✅ **File Drop & Processing**
+  - Drag-and-drop file interface
+  - Click-to-select file picker
+  - Multiple file support
+  - AI normalization integration
+
+- ✅ **Dual Input Modes**
+  - Note tab: Text input + file drop
+  - Mic tab: Audio recording (MediaRecorder API)
+  - Tab switching for different workflows
+
+- ✅ **AI Integration**
+  - Automatic file normalization
+  - Local endpoint support (localhost:5001)
+  - Fallback handling for offline mode
+  - Summary preview panel
+
+- ✅ **Watcher Automation**
+  - Automatic case_updates.json generation
+  - File drop triggers
+  - Manual watcher activation button
+  - Timeline integration ready
+
+- ✅ **Resizable & Draggable**
+  - react-rnd integration
+  - Window bounds respect
+  - Position persistence ready
+  - Smooth animations
+
 ### Sticky Notes
 - ✅ **Smart Sticky Notes**
   - Positionable notes
