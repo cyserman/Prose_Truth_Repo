@@ -33,7 +33,9 @@ import {
   GitBranch,
   Mic,
   Square,
-  FileJson
+  FileJson,
+  Moon,
+  Sun
 } from 'lucide-react';
 import SmartSticky from './components/SmartSticky';
 import { useStickyNotes } from './lib/useStickyNotes';
@@ -1373,7 +1375,7 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
             </div>
             <h1 className="font-bold text-lg tracking-tight text-center">ProSe Legal DB</h1>
           </div>
-          <p className="text-[10px] text-orange-400/70 uppercase tracking-[0.2em] font-bold text-center">Cathedral Framework</p>
+          <p className="text-[10px] text-blue-600 uppercase tracking-[0.2em] font-bold text-center">Cathedral Framework</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto scrollbar-hide">
@@ -1414,10 +1416,10 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
           <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest text-center">Theme</div>
           <div className="px-4 space-y-1">
             <button onClick={() => setTheme('light')} className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm ${theme === 'light' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
-              ☀️ Light
+              <Sun className="w-4 h-4" /> Light
             </button>
             <button onClick={() => setTheme('dark')} className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm ${theme === 'dark' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
-              🌙 Dark
+              <Moon className="w-4 h-4" /> Dark
             </button>
             <button onClick={() => setTheme('textured')} className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm ${theme === 'textured' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
               🎨 Textured Blue
@@ -1595,9 +1597,9 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
                                 <div className="font-bold text-slate-950 mb-1 leading-tight">{event.short_title}</div>
                                 <div className="text-sm text-slate-600 leading-relaxed mb-3">{event.description}</div>
                                 {event.description_neutral && (
-                                  <div className="mt-2 p-2 bg-indigo-50 border border-indigo-200 rounded text-xs">
-                                    <div className="font-semibold text-indigo-900 mb-1">Neutral Draft (AI):</div>
-                                    <div className="text-indigo-700">{event.description_neutral}</div>
+                                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                                    <div className="font-semibold text-blue-900 mb-1">Neutral Draft (AI):</div>
+                                    <div className="text-blue-700">{event.description_neutral}</div>
                                   </div>
                                 )}
                                 {event.description_original && event.description_original !== event.description && (
@@ -1614,9 +1616,9 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
                                 </button>
                               </div>
                               <button onClick={() => handleNeutralize(event.event_id, event.description)} disabled={neutralizingId === event.event_id}
-                                className="shrink-0 flex items-center gap-1.5 text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2.5 py-1.5 rounded-lg border border-indigo-100 hover:bg-indigo-600 hover:text-white transition disabled:opacity-50">
+                                className="shrink-0 flex items-center gap-1 text-[9px] font-semibold bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200 hover:bg-blue-600 hover:text-white transition disabled:opacity-50">
                                 {neutralizingId === event.event_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                                ✨ NEUTRALIZE
+                                Neutralize
                               </button>
                             </div>
                             <div className="text-[10px] text-slate-400 italic">Source: {event.source}</div>
@@ -1707,6 +1709,21 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
             </div>
           )}
 
+          {view === 'swimlane' && (
+            <div className="w-full h-full">
+              <SwimlaneTimeline
+                csvPath={null}
+                events={events}
+                onEventClick={(event) => {
+                  // Trigger event attachment for FloatingNoteConsole
+                  window.dispatchEvent(
+                    new CustomEvent("attachEventToNoteConsole", { detail: event })
+                  );
+                }}
+              />
+            </div>
+          )}
+
         </div>
       </main>
 
@@ -1719,6 +1736,22 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
           onClose={(id) => deleteNote(id)}
         />
       ))}
+
+      {/* Render Floating Note Console - always available */}
+      <FloatingNoteConsole
+        events={events.map((e, idx) => ({
+          ...e,
+          id: idx,
+          Date: e.event_date,
+          Filename: e.short_title || e.event_id,
+          Categories: e.event_type,
+          Note: e.description || ''
+        }))}
+        onNewNote={(noteEntry) => {
+          console.log('New note from console:', noteEntry);
+          showNotification('📝 Note saved and queued for timeline merge');
+        }}
+      />
     </div>
   );
 }
