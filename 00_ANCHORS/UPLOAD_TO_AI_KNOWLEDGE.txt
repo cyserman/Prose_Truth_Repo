@@ -1,148 +1,74 @@
 === THREAD ANCHOR ===
-THREAD ANCHOR
-F250 -> Legal -> Pro Se App
 Date: 2025-12-17
 Owner: Christopher Firey
 
 PURPOSE
--------
-This document freezes the factual, strategic, and architectural conclusions reached
-across a long, mixed-context thread. It prevents loss of context.
+Freeze context and prevent hallucination
 
-SECTION 1 — IMMEDIATE REALITY (GROUND TRUTH)
-• Primary vehicle (2004 Ford F-250) failure during custody exchange.
-• Driving unsafe vehicle was avoided.
-• Missed exchanges were safety-based, not willful.
-• Communication interference is ongoing (blocked app).
-• Father is housing-insecure but employed.
+GROUND TRUTH
+• Vehicle failure (2004 Ford F-250) during custody exchange
+• Communication interference ongoing (blocked app)
+• Housing-insecure but employed
 
-SECTION 2 — CORE LEGAL THEORY
-This case centers on a **manufactured imbalance**, not parental fitness.
-The pattern: Removal -> Denial of tools -> PFA filings -> Delay -> Status Quo hardening.
-Requested relief is CORRECTIVE, not PUNITIVE.
+CORE LEGAL THEORY
+Manufactured imbalance, not parental fitness
+Pattern: Removal → Denial of tools → PFA filings → Delay → Status quo hardening
 
-SECTION 3 — STRATEGIC OBJECTIVES
-1. Neutralize presumption of status quo.
-2. Restore court oversight.
-3. Re-establish parent-child contact.
-4. Remove financial leverage.
+STRATEGIC OBJECTIVES
+1. Neutralize status quo
+2. Restore court oversight
+3. Re-establish parent-child contact
+4. Remove financial leverage
 
-SECTION 4 — TIMELINE-FIRST STRATEGY
+TIMELINE-FIRST STRATEGY
 If it can be dated, it goes on the timeline.
 If it can be documented, it gets an exhibit code.
-Goal: Judge understands case in <10 mins.
-
-SECTION 5 — SOFTWARE
-Local-first Pro Se Legal DB: Import -> Index -> Print.
-
+Goal: Judge understands in under 10 minutes.
 
 === WHAT A WIN LOOKS LIKE ===
-# ANCHOR: WHAT A WIN LOOKS LIKE
-**Date:** 2025-12-17
 
-## PURPOSE
-To define "winning" in realistic, judicial terms and prevent emotional burnout.
+Winning is correction and trajectory, not domination.
 
-## THE WIN
-Winning is **correction and trajectory**, not domination.
+- Status quo loses immunity
+- Court oversight restored
+- Ramped custody begins
+- Financial leverage collapses
+- Case becomes boring
 
-**LAYER 1:** Status quo loses immunity. The court questions how the arrangement arose.
-**LAYER 2:** Court inserts structure (GAL, schedules).
-**LAYER 3:** Ramped custody begins.
-**LAYER 4:** Financial leverage collapses (Bifurcation).
-**LAYER 5:** The case becomes boring.
-
-## WHAT WINNING IS NOT
-- Public scolding of the other party.
-- Moral vindication.
-- Instant 50/50 after disruption.
-
+NOT A WIN:
+- Public scolding
+- Moral vindication
+- Instant 50/50
 
 === README ===
-# ⚖️ PRO SE LEGAL DB (The Truth Repo)
-**Case:** Firey v. Firey
-**Jurisdiction:** Montgomery County, PA
-**Status:** Litigation Mode
 
-## 🎯 PURPOSE
+# ⚖️ PRO SE LEGAL DB (The Truth Repo)
+
+Case: Firey v. Firey
+Jurisdiction: Montgomery County, PA
+
+PURPOSE
 Single, authoritative source of truth. Designed to survive device failure and counsel changes.
 For AI Agents: Do not hallucinate. Use only files present here.
 
-## 📂 DIRECTORY STRUCTURE
-- **00_ANCHORS**: The Constitution (Read First).
-- **02_TIMELINES**: Data Core (CSVs).
-- **03_EXHIBITS**: Finalized Evidence.
-- **06_SCANS**: Input Funnel (Dump raw files here).
-- **09_APP**: The React Tooling.
+DIRECTORY STRUCTURE
+00_ANCHORS – Constitutional anchors
+02_TIMELINES – Data core (CSVs)
+03_EXHIBITS – Finalized evidence
+06_SCANS – Input funnel
+09_APP – React tooling
 
-## 👨‍💻 INSTRUCTIONS
-1. **Ingest**: Drop raw files in 06_SCANS/INBOX.
-2. **Process**: Use App to OCR/Tag.
-3. **Archive**: Move to 03_EXHIBITS.
+AI PRIME DIRECTIVE
+1. Read 00_ANCHORS first
+2. Neutralize emotional input
+3. Identify manufactured imbalance
 
-## 🤖 AI PRIME DIRECTIVE
-1. Read 00_ANCHORS first.
-2. Neutralize emotional input.
-3. Identify "Manufactured Imbalance".
+=== UI STATUS ===
 
+React app with:
+- Timeline builder with neutralization
+- CSV import/export
+- Strategic analyzer
+- Print-to-PDF output
 
-=== DACHSHUND UI AUDIT ===
-UI AUDIT — PROSE LEGAL DB (REACT VERSION)
-───────────────────────────────────────────────
-✅ OVERVIEW
-You’ve implemented a full React-based interface that integrates:
-- Timeline builder with neutralization logic
-- CSV import/export for case data
-- Strategic Analyzer using Gemini (future backend slot)
-- Print-to-PDF for judge-ready format
-- Evidence and Exhibit index linkage
-
-───────────────────────────────────────────────
-⚙️ FUNCTIONAL COMPONENTS
-• Timeline View
-  - Event table with classification badges
-  - Real-time search & category filtering
-  - ✨ Neutralization button (rewrites emotional text → court-ready language)
-  - Exhibit link display for each row
-
-• Strategic Analyzer
-  - Uses `runStrategicAnalysis()` to build tactical insight
-  - Outputs “Clean Moves” and Evidence Gaps
-  - Perfect bridge to automated Summary Generator (Phase 2 of your plan)
-
-• Import / Export
-  - CSV import for NORMALIZED_TIMELINE.csv and EXHIBIT_INDEX.csv
-  - JSON backup generator for the “truth repo” archive
-  - Fully local-first; no data leaves the browser
-
-• Print Mode
-  - Clean, serif PDF-ready layout
-  - Uses minimal branding; outputs “Exhibit A – Motion for Restored Parenting Time”
-  - Auto page-break control and compact design
-
-───────────────────────────────────────────────
-🧩 STRATEGIC ALIGNMENT
-This UI now directly fulfills your:
-1. **Summary Generator Plan** — manual input + clean neutral output
-2. **Pro Se Agent Architecture** — Gemini-based auto-analysis (Phase 2)
-3. **Evidence Indexer Goal** — CSV-driven exhibit linkage
-
-───────────────────────────────────────────────
-🧠 NEXT IMPROVEMENTS
-1. 🔐 Add `localStorage` persistence
-   → Keeps timeline & exhibit state after browser refresh.
-
-2. 🗂️ Integrate auto-summary builder
-   → Map `runStrategicAnalysis()` output to a “Generate Custody Summary” function.
-
-3. 📄 Add export-to-PDF button in print mode
-   → Wrap with `window.print()` or `html2pdf.js` for direct save.
-
-4. ⚖️ Link neutralization edits back to CSV
-   → Optional `Download Cleaned_Timeline.csv` export.
-
-───────────────────────────────────────────────
-STATUS:
-Stable — UI phase complete.  
-Ready to integrate with Summary Generator Plan (Phase 2 automation).
-───────────────────────────────────────────────
+Next: LocalStorage persistence, auto-summary builder

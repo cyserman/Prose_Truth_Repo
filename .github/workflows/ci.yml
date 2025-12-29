@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, standalone-component ]
+  pull_request:
+    branches: [ main, standalone-component ]
+
+jobs:
+  lint-shell:
+    name: Shell Script Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+      
+      - name: Run shellcheck
+        run: |
+          shellcheck restore_christine.sh || exit 1
+          echo "✅ Shellcheck passed"
+
+  test-shell:
+    name: Shell Script Tests (Bats)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install bats
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats
+      
+      - name: Run Bats tests
+        run: |
+          bats tests/restore_christine.bats
+          bats tests/integration.bats
+          echo "✅ All Bats tests passed"
+
+  lint-js:
+    name: JavaScript Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '09_APP/prose-legal-db-app/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: 09_APP/prose-legal-db-app
+        run: npm ci
+      
+      - name: Run ESLint
+        working-directory: 09_APP/prose-legal-db-app
+        run: npm run lint || echo "⚠️ Linting issues found (non-blocking)"
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '09_APP/prose-legal-db-app/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: 09_APP/prose-legal-db-app
+        run: npm ci
+      
+      - name: Build
+        working-directory: 09_APP/prose-legal-db-app
+        run: npm run build
+

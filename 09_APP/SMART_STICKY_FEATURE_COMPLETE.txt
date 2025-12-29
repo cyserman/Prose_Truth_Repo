@@ -1,0 +1,347 @@
+================================================================================
+SMART STICKY NOTES FEATURE - COMPLETE BUNDLE
+================================================================================
+Paste this entire block into your project. Sections are marked with file paths.
+
+================================================================================
+FILE 1: src/lib/useStickyNotes.js
+================================================================================
+// src/lib/useStickyNotes.js
+import { useState } from 'react';
+
+export function useStickyNotes() {
+  const [notes, setNotes] = useState([]);
+
+  const addNote = (note) => {
+    setNotes((prev) => [...prev, { ...note, id: Date.now() }]);
+  };
+
+  const updateNote = (updated) => {
+    setNotes((prev) =>
+      prev.map((n) => (n.id === updated.id ? { ...n, ...updated } : n))
+    );
+  };
+
+  const deleteNote = (id) => {
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  return { notes, addNote, updateNote, deleteNote };
+}
+
+================================================================================
+FILE 2: src/components/SmartSticky.jsx
+================================================================================
+// src/components/SmartSticky.jsx
+import React, { useState, useRef, useEffect } from 'react';
+
+const SmartSticky = ({ id, initialText = '', x = 100, y = 100, targetFile, onSave, onClose }) => {
+  const [text, setText] = useState(initialText);
+  const [listening, setListening] = useState(false);
+  const [pos, setPos] = useState({ x, y });
+  const stickyRef = useRef(null);
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognizer = SpeechRecognition ? new SpeechRecognition() : null;
+
+  useEffect(() => {
+    if (!recognizer) return;
+    recognizer.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setText((prev) => `${prev} ${transcript}`);
+      setListening(false);
+    };
+    recognizer.onerror = () => setListening(false);
+  }, [recognizer]);
+
+  const startListening = () => {
+    if (!recognizer) return;
+    setListening(true);
+    recognizer.start();
+  };
+
+  const stopListening = () => {
+    if (!recognizer) return;
+    recognizer.stop();
+    setListening(false);
+  };
+
+  const handleMouseDown = (e) => {
+    const startX = e.clientX - pos.x;
+    const startY = e.clientY - pos.y;
+    const onMouseMove = (ev) => {
+      setPos({ x: ev.clientX - startX, y: ev.clientY - startY });
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', () => {
+      window.removeEventListener('mousemove', onMouseMove);
+    }, { once: true });
+  };
+
+  const handleSave = () => {
+    onSave({ id, text, x: pos.x, y: pos.y, targetFile });
+  };
+
+  return (
+    <div
+      ref={stickyRef}
+      onMouseDown={handleMouseDown}
+      style={{ position: 'fixed', top: pos.y, left: pos.x, width: '240px', zIndex: 999 }}
+      className="bg-yellow-100 border border-yellow-400 rounded-lg shadow-lg p-3 cursor-move"
+    >
+      <p className="text-xs text-gray-600 font-bold">🗒️ {targetFile || 'Note'}</p>
+      <textarea
+        className="w-full h-20 p-1 text-sm font-mono bg-yellow-50 border border-yellow-300 rounded"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Type or speak..."
+      />
+      <div className="flex justify-between items-center mt-1 text-xs">
+        <button
+          onClick={() => (listening ? stopListening() : startListening())}
+          className={`px-2 py-1 rounded ${
+            listening ? 'bg-red-400 text-white' : 'bg-green-500 text-black'
+          }`}
+        >
+          {listening ? '🛑 Stop' : '🎤 Speak'}
+        </button>
+        <div className="flex gap-1">
+          <button onClick={handleSave} className="text-blue-700 font-bold">💾</button>
+          <button onClick={() => onClose(id)} className="text-gray-700">✖️</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SmartSticky;
+
+================================================================================
+FILE 3: INTEGRATION INTO prose_legal_db.jsx
+================================================================================
+Add these imports at the top of prose_legal_db.jsx:
+
+import SmartSticky from './components/SmartSticky';
+import { useStickyNotes } from './lib/useStickyNotes';
+
+Add this hook call inside the ProSeLegalDB component (around line 340):
+
+const { notes, addNote, updateNote, deleteNote } = useStickyNotes();
+
+In the Timeline view section (around line 850), add "Add Note" button to each event:
+
+{filteredEvents.map((e) => (
+  <div key={e.id} style={{ border: "1px solid rgba(0,0,0,0.10)", borderRadius: 12, padding: 12, marginBottom: 10 }}>
+    {/* ... existing event content ... */}
+    
+    {/* ADD THIS BUTTON */}
+    <button
+      onClick={() => addNote({ text: '', targetFile: e.short_title || e.event_id, x: 200, y: 200 })}
+      className="mt-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded text-sm hover:bg-yellow-200"
+    >
+      📝 Add Note to This Event
+    </button>
+  </div>
+))}
+
+At the end of the component's return statement (before closing </div>), add:
+
+{/* Render floating sticky notes */}
+{notes.map((note) => (
+  <SmartSticky
+    key={note.id}
+    {...note}
+    onSave={updateNote}
+    onClose={(id) => deleteNote(id)}
+  />
+))}
+
+================================================================================
+FILE 4: README.md ADDITION (Add to your existing README)
+================================================================================
+
+## 🗒️ Smart Sticky Notes Feature
+
+The ProSe Legal DB now supports **Smart Sticky Notes** - draggable, voice-enabled notes that can be attached to timeline events or evidence files.
+
+### 💡 Features
+- ✅ **Draggable UI**: Move notes anywhere on screen and reposition freely
+- ✅ **Voice Dictation**: Use microphone to dictate directly into notes using browser's speech recognition API
+- ✅ **Event Anchoring**: Notes can be linked to specific timeline events or files
+- ✅ **Quick Save + Delete**: Save notes with 💾 or remove with ✖️ in one click
+- ✅ **Multiple Notes**: Add as many stickies as needed per event
+- ✅ **Persistent State**: Notes stored in React state (extendable to localStorage)
+
+### 🧩 How to Use
+
+1. **View Timeline**: Navigate to Timeline view in the app
+2. **Add Note**: Click "📝 Add Note to This Event" on any timeline entry
+3. **Position**: Drag the sticky note to your preferred location
+4. **Input**: Type directly or click 🎤 to use voice dictation
+5. **Save**: Click 💾 to save the note (linked to that event)
+6. **Remove**: Click ✖️ to delete a note
+
+### 🗂️ Sticky Note Data Structure
+
+```javascript
+{
+  id: Number,           // Unique identifier
+  text: String,         // Note content
+  targetFile: String,   // Event title or file name (for anchoring)
+  x: Number,           // X position on screen
+  y: Number            // Y position on screen
+}
+```
+
+### 🛠️ Technical Details
+
+**Components:**
+- `SmartSticky.jsx` - Draggable sticky note component with speech recognition
+- `useStickyNotes.js` - React hook for managing note state
+
+**Speech Recognition:**
+- Uses `window.SpeechRecognition` or `window.webkitSpeechRecognition`
+- Gracefully falls back if browser doesn't support it
+- Requires microphone permissions
+
+**Positioning:**
+- Notes use `position: fixed` to float above content
+- Drag handles update x/y coordinates
+- Positions persist during session
+
+### 🔮 Future Enhancements
+
+- [ ] Persistent storage via localStorage
+- [ ] Export notes to JSON/CSV
+- [ ] Timeline timestamp anchors
+- [ ] LLM-powered note suggestions
+- [ ] Markdown formatting in notes
+
+================================================================================
+FILE 5: docs/DEV_NOTES.md (Create this file or add to existing)
+================================================================================
+
+# Developer Notes: Smart Sticky Notes Integration
+
+## Architecture
+
+The sticky note system uses a simple React hook pattern:
+
+```
+useStickyNotes() → { notes, addNote, updateNote, deleteNote }
+     ↓
+SmartSticky component (rendered for each note)
+     ↓
+Floating UI with drag + speech recognition
+```
+
+## Integration Points
+
+### Timeline Events
+Each event in the timeline can spawn sticky notes via:
+```jsx
+addNote({ text: '', targetFile: event.short_title, x: 200, y: 200 })
+```
+
+### Evidence Files
+Files in Evidence Organizer can also have notes:
+```jsx
+addNote({ text: '', targetFile: file.name, x: 200, y: 200 })
+```
+
+## State Management
+
+Currently uses React `useState`. To persist:
+
+```javascript
+// Add to useStickyNotes.js
+useEffect(() => {
+  const saved = localStorage.getItem('PROSE_STICKY_NOTES');
+  if (saved) setNotes(JSON.parse(saved));
+}, []);
+
+useEffect(() => {
+  localStorage.setItem('PROSE_STICKY_NOTES', JSON.stringify(notes));
+}, [notes]);
+```
+
+## Speech Recognition API
+
+Browser compatibility:
+- ✅ Chrome/Edge: Full support
+- ✅ Safari: Partial (webkit prefix)
+- ❌ Firefox: Not supported (graceful fallback)
+
+## Performance Notes
+
+- Notes render with `position: fixed` - no layout shifts
+- Drag handlers use native events (no external libs)
+- Speech recognition stops automatically on errors
+
+## Testing
+
+To test voice input:
+1. Grant microphone permissions
+2. Click 🎤 button
+3. Speak clearly
+4. Text should appear in textarea
+
+To test dragging:
+1. Click and hold note header
+2. Drag anywhere on screen
+3. Release to drop
+4. Position should persist
+
+================================================================================
+FILE 6: docs/FEATURES.md (Create this file)
+================================================================================
+
+# ProSe Legal DB - Feature List
+
+## Core Features
+
+### Timeline Management
+- Chronological event tracking
+- CSV import/export
+- Event categorization
+- Search and filtering
+
+### Evidence Organizer
+- File upload (drag & drop)
+- Smart versioning
+- OCR processing (Gemini Vision)
+- Status tracking
+
+### Strategic Analysis
+- AI-powered neutralization
+- Strategic insights (Gemini)
+- Court-ready export
+
+### 🗒️ Smart Sticky Notes (NEW)
+- Draggable notes attached to events
+- Voice dictation support
+- Multiple notes per event
+- Visual anchoring to timeline items
+
+## Feature Roadmap
+
+### Planned
+- [ ] Sticky note persistence (localStorage)
+- [ ] Note export to JSON/CSV
+- [ ] Timeline timestamp anchors for notes
+- [ ] LLM note suggestions
+- [ ] Markdown formatting in notes
+- [ ] Note search/filter
+- [ ] Note categories/tags
+
+### Future Considerations
+- [ ] Backend sync for notes
+- [ ] Collaborative note sharing
+- [ ] Note templates
+- [ ] Note-to-exhibit linking
+
+================================================================================
+END OF BUNDLE
+================================================================================
+Copy everything above and paste into your project. Follow file path markers.
+
