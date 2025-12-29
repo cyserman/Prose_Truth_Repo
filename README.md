@@ -39,6 +39,15 @@ npm install
 npm run dev
 ```
 
+### Start Backend Agents (Optional)
+```bash
+# Start reflexive intake agent
+python 09_APP/agents/reflexive_intake_agent.py
+
+# Or use the orchestrator
+python 09_APP/agents/orchestrator.py
+```
+
 ## DIRECTORY STRUCTURE
 
 ```
@@ -66,14 +75,16 @@ npm run dev
 - Exhibit linkage system
 - Neutralization of emotional language
 - Print-to-PDF court-ready output
-- **Swimlane timeline views** with customizable profiles
+- **Swimlane timeline views** with customizable lane profiles
+- **Smart Sticky Notes** - Context-aware annotations
 
 ### Evidence Management
 - Categorized exhibit system (CL, FIN, PKT, VEH, etc.)
-- OCR processing pipeline
+- OCR processing pipeline (standalone + integrated)
 - Index generation
 - **Reflexive intake agent** with logic checks
 - **Floating note console** for quick annotations
+- Voice recording for evidence capture
 
 ### AI Integration
 - Strategic analysis via Gemini API
@@ -81,11 +92,19 @@ npm run dev
 - Gap analysis and consistency checking
 - **Contradiction detector** for cross-examination prep
 - **Motion/Affidavit builder** for document generation
+- Neutralization of emotional event descriptions
 
 ### Document Tools
 - **Motion Builder** - Generate court documents from timeline
 - **Deadline Tracker** - Never miss a court date
 - **Contradiction Detector** - Find inconsistencies automatically
+- **Smart Sticky Notes** - Context-aware floating annotations
+
+### Privacy & Security
+- All data remains local (no cloud sync)
+- Sensitive exhibits and scans ignored via `.gitignore`
+- Secrets scanning and pre-commit hooks
+- Accessibility compliance (WCAG 2.1 AA)
 
 ## RESTORE SCRIPT
 

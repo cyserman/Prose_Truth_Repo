@@ -1,18 +1,63 @@
+# Dependencies
+node_modules/
+09_APP/**/node_modules/
 
-# Environment files
+# Build outputs
+dist/
+build/
+*.log
+
+# Environment variables
 .env
 .env.local
+.env.*.local
 
-# Backup files
-*.backup
-*.v2.backup
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Trash/archive folders
-06_SCANS/INBOX/to_trash/
-06_SCANS/INBOX/new/
+# OS
+.DS_Store
+Thumbs.db
 
-# Workspace files
-*.code-workspace
+# Temporary files
+*.tmp
+*.temp
+.cache/
 
-# Embedded git repos in trash
-**/to_trash/**/.git/
+# Backups (keep structure, ignore contents)
+backups/*
+!backups/.gitkeep
+
+# Logs
+logs/*
+!logs/.gitkeep
+
+# Test artifacts
+test-results/
+coverage/
+
+# Secrets
+*.key
+*.pem
+*.p12
+secrets/
+
+# Scans directory (temporary downloads)
+06_SCANS/INBOX/
+
+# Database files (local only)
+09_APP/Database/*.db
+09_APP/Database/*.sqlite
+09_APP/Database/*.sqlite3
+
+# Generated files
+09_APP/Generated/*.csv
+09_APP/Generated/*.json
+!09_APP/Generated/.gitkeep
+
+# Secrets baseline (committed, but track changes)
+# .secrets.baseline

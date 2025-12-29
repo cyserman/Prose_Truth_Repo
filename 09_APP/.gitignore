@@ -1,0 +1,53 @@
+# Sensitive data - NEVER commit these
+Evidence/
+Scans/
+Backups/
+Documents/
+*.pdf
+*.docx
+*.doc
+*.mp3
+*.wav
+*.mp4
+*.avi
+*.mov
+
+# Local cache and configs
+*.log
+*.json
+.DS_Store
+node_modules/
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Build outputs
+dist/
+build/
+*.zip
+*.tar.gz
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+

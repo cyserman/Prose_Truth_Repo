@@ -1,0 +1,87 @@
+name: Restore Christine (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: 'staging'
+      dry_run:
+        description: 'Run in dry-run mode'
+        required: true
+        type: boolean
+        default: true
+      backup_dir:
+        description: 'Backup directory path'
+        required: false
+        type: string
+        default: 'backups/auto-YYYYMMDD-HHMMSS'
+      skip_confirmations:
+        description: 'Skip confirmation prompts (use with caution)'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  restore:
+    name: Restore Christine
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+      # Configure required reviewers in GitHub repo settings > Environments
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Create backup directory
+        run: |
+          mkdir -p backups
+          echo "Backup directory created"
+      
+      - name: Run restore script (Dry Run)
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          chmod +x restore_christine.sh
+          ./restore_christine.sh \
+            --dry-run \
+            --backup-dir "backups/ci-${{ github.run_id }}" \
+            --log "logs/restore-ci-${{ github.run_id }}.log" \
+            ${{ github.event.inputs.skip_confirmations && '--yes' || '' }}
+      
+      - name: Run restore script (Live)
+        if: github.event.inputs.dry_run == 'false'
+        run: |
+          chmod +x restore_christine.sh
+          ./restore_christine.sh \
+            --backup-dir "backups/ci-${{ github.run_id }}" \
+            --log "logs/restore-ci-${{ github.run_id }}.log" \
+            ${{ github.event.inputs.skip_confirmations && '--yes' || '' }}
+      
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: restore-logs-${{ github.run_id }}
+          path: |
+            logs/restore-ci-*.log
+          retention-days: 30
+      
+      - name: Upload backups
+        if: always() && github.event.inputs.dry_run == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: restore-backups-${{ github.run_id }}
+          path: |
+            backups/ci-*
+          retention-days: 90
+
