@@ -290,10 +290,62 @@ const DragDropZone = ({ onFileSelect, title, sub, icon: Icon, accept = "*", mult
 
 const FILE_CATEGORIES = ['Incident', 'Communication', 'Evidence', 'Court Filing', 'Note', 'Other'];
 
-const FileOrganizerCard = ({ fileData, onUpdateNote, onDelete, onStatusChange, onAnalyze, onClassify, categories = [], onPredictCategory, onStartTranscription, isTranscribing, transcriptionText }) => {
+const getFlagDescription = (flag) => {
+  const descriptions = {
+    'needs_evidence': 'This incident needs supporting evidence documents',
+    'unlinked_evidence': 'This evidence should be linked to an incident',
+    'link_required': 'Needs to be linked to an existing timeline event',
+    'needs_source': 'Source or origin needs to be specified',
+    'needs_verification': 'Requires verification before filing'
+  };
+  return descriptions[flag] || flag;
+};
+
+const getProcessingInfo = (fileName, fileType) => {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  const info = {
+    canProcess: false,
+    handler: null,
+    destination: null,
+    action: null,
+    reason: null,
+    eta: null
+  };
+
+  if (ext === 'csv') {
+    info.canProcess = true;
+    info.handler = 'master_case_db_builder';
+    info.destination = 'Database/Master_CaseDB.csv';
+    info.action = 'merge';
+    info.eta = '<instant>';
+    info.reason = 'CSV will be merged into master timeline';
+  } else if (['pdf', 'jpg', 'jpeg', 'png', 'tif', 'tiff'].includes(ext)) {
+    info.canProcess = true;
+    info.handler = 'standalone_ocr';
+    info.destination = 'Database (after OCR)';
+    info.action = 'extract_text';
+    info.eta = '~30 seconds';
+    info.reason = 'Will extract text via OCR';
+  } else if (['docx', 'txt'].includes(ext)) {
+    info.canProcess = true;
+    info.handler = 'text_processor';
+    info.destination = 'Database';
+    info.action = 'index';
+    info.eta = '<instant>';
+    info.reason = 'Text file will be indexed';
+  } else {
+    info.canProcess = false;
+    info.reason = `Unsupported format: .${ext}`;
+    info.destination = 'Generated (manual processing)';
+  }
+
+  return info;
+};
+
+const FileOrganizerCard = ({ fileData, onUpdateNote, onDelete, onStatusChange, onAnalyze, onClassify, categories = [], flags = [], onPredictCategory, onStartTranscription, isTranscribing, transcriptionText, isPendingClassification = false }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isClassifying, setIsClassifying] = useState(false);
+  const [isClassifying, setIsClassifying] = useState(isPendingClassification);
   const [logicWarnings, setLogicWarnings] = useState([]);
   
   const getIcon = (type) => {
@@ -349,7 +401,39 @@ const FileOrganizerCard = ({ fileData, onUpdateNote, onDelete, onStatusChange, o
           {categories.length > 0 && categories.map(cat => (
             <Badge key={cat} className="bg-indigo-100 text-indigo-700 border-indigo-200">{cat}</Badge>
           ))}
+          {flags.length > 0 && flags.map(flag => (
+            <Badge key={flag} className="bg-amber-100 text-amber-700 border-amber-200" title={getFlagDescription(flag)}>
+              ⚠️ {flag.replace('_', ' ')}
+            </Badge>
+          ))}
         </div>
+        {isPendingClassification && (
+          <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-[10px] text-blue-800">
+            🆕 New file detected — Please classify to add to timeline
+          </div>
+        )}
+        {/* Processing Info Display */}
+        {(() => {
+          const procInfo = getProcessingInfo(fileData.name, fileData.type);
+          return (
+            <div className="mb-3 p-2 bg-slate-50 border border-slate-200 rounded text-[10px]">
+              <div className="font-bold text-slate-700 mb-1">⚙️ Processing Info:</div>
+              {procInfo.canProcess ? (
+                <div className="space-y-0.5 text-slate-600">
+                  <div>📍 <span className="font-semibold">Destination:</span> {procInfo.destination}</div>
+                  <div>🔧 <span className="font-semibold">Handler:</span> {procInfo.handler}</div>
+                  <div>⚡ <span className="font-semibold">Action:</span> {procInfo.action}</div>
+                  <div>🕓 <span className="font-semibold">ETA:</span> {procInfo.eta}</div>
+                </div>
+              ) : (
+                <div className="text-amber-700">
+                  <div>⚠️ <span className="font-semibold">Cannot process:</span> {procInfo.reason}</div>
+                  <div className="mt-1">💡 <span className="font-semibold">Suggestion:</span> Convert to supported format or process manually</div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
         {isClassifying ? (
           <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
             <div className="text-xs font-bold text-indigo-900 mb-2">Classify File:</div>
@@ -484,6 +568,8 @@ export default function ProSeLegalDB() {
   // Classification state for files
   const [classifyingFileId, setClassifyingFileId] = useState(null);
   const [fileCategories, setFileCategories] = useState({});
+  const [fileFlags, setFileFlags] = useState({}); // needs_evidence, unlinked_evidence, link_required, needs_source, needs_verification
+  const [pendingClassification, setPendingClassification] = useState(null); // {fileId, fileName} for auto-prompt
   
   // Microphone recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -510,6 +596,7 @@ export default function ProSeLegalDB() {
         if (parsed.exhibits) setExhibits(parsed.exhibits);
         if (parsed.files) setFiles(parsed.files.map(f => ({...f, fileObj: null}))); 
         if (parsed.fileCategories) setFileCategories(parsed.fileCategories);
+        if (parsed.fileFlags) setFileFlags(parsed.fileFlags);
         if (parsed.theme) setTheme(parsed.theme);
       }
     } catch (e) {
@@ -523,10 +610,11 @@ export default function ProSeLegalDB() {
       exhibits, 
       files: files.map(f => ({...f, fileObj: null})),
       fileCategories,
+      fileFlags,
       theme
     };
     localStorage.setItem(LS_KEY, JSON.stringify(payload));
-  }, [events, exhibits, files, fileCategories, theme]);
+  }, [events, exhibits, files, fileCategories, fileFlags, theme]);
 
   // Cleanup recording on unmount
   useEffect(() => {
@@ -606,6 +694,15 @@ export default function ProSeLegalDB() {
       
       if (skippedCount > 0) showNotification(`⚠️ Skipped ${skippedCount} exact duplicates.`);
       if (versionedCount > 0) showNotification(`🔄 Created ${versionedCount} new versions.`);
+      
+      // REFLEXIVE INTAKE: Auto-prompt for classification of new files
+      if (newFiles.length > 0) {
+        const firstNewFile = newFiles[0];
+        setTimeout(() => {
+          setPendingClassification({ fileId: firstNewFile.id, fileName: firstNewFile.name });
+          setClassifyingFileId(firstNewFile.id);
+        }, 500);
+      }
       
       return [...prev, ...newFiles];
     });
@@ -786,23 +883,69 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
     }
   };
 
-  // --- LOGIC CHECKS (Incident ↔ Evidence) ---
+  // --- REFLEXIVE INTAKE AGENT: LOGIC CHECKS & FLAGGING ---
   const validateClassification = (fileId, newCategory) => {
     const currentCats = fileCategories[fileId] || [];
     const willHaveIncident = currentCats.includes('Incident') || newCategory === 'Incident';
     const willHaveEvidence = currentCats.includes('Evidence') || newCategory === 'Evidence';
     
     const warnings = [];
+    const flags = [];
     
     if (willHaveIncident && !willHaveEvidence) {
       warnings.push('⚠️ Incident without Evidence? Consider adding supporting documents.');
+      flags.push('needs_evidence');
     }
     
     if (willHaveEvidence && !willHaveIncident) {
       warnings.push('⚠️ Evidence without linked Incident? Consider linking to an event.');
+      flags.push('unlinked_evidence');
+    }
+    
+    // Update flags
+    if (flags.length > 0) {
+      setFileFlags(prev => ({
+        ...prev,
+        [fileId]: [...new Set([...(prev[fileId] || []), ...flags])]
+      }));
+    } else {
+      // Clear flags if logic is satisfied
+      setFileFlags(prev => {
+        const updated = {...prev};
+        if (updated[fileId]) {
+          updated[fileId] = updated[fileId].filter(f => !['needs_evidence', 'unlinked_evidence'].includes(f));
+          if (updated[fileId].length === 0) delete updated[fileId];
+        }
+        return updated;
+      });
     }
     
     return warnings;
+  };
+
+  // --- GUARANTEED TIMELINE ENTRY FROM FILE ---
+  const createTimelineEntryFromFile = (fileId, categories, note, flags) => {
+    const file = files.find(f => f.id === fileId);
+    if (!file) return;
+
+    const eventId = `FILE-${fileId.substring(0, 6).toUpperCase()}`;
+    const today = new Date().toISOString().split('T')[0];
+    
+    const newEvent = {
+      event_id: eventId,
+      event_date: today,
+      event_type: categories[0] || 'Other',
+      short_title: `File: ${file.name}`,
+      description: note || `File uploaded: ${file.name}. ${flags.length > 0 ? `Flags: ${flags.join(', ')}` : ''}`,
+      description_original: note || '',
+      description_neutral: '',
+      source: 'File Upload',
+      exhibit_code: '',
+      reliability: flags.length > 0 ? 'Needs Review' : 'High'
+    };
+
+    setEvents(prev => [...prev, newEvent]);
+    showNotification(`✅ File logged to timeline as ${eventId}`);
   };
 
   // --- MASTER NARRATIVE IMPORT ---
@@ -1222,13 +1365,13 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
 
       <aside className="w-72 glass-dark text-white flex flex-col shrink-0 border-r border-white/10">
         <div className="p-6 border-b border-white/10">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="bg-blue-600 p-1.5 rounded shadow-lg shadow-blue-900/20 animate-glow">
-              <ShieldCheck className="w-5 h-5" />
+          <div className="flex flex-col items-center justify-center gap-2 mb-1">
+            <div className="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-900/20 animate-glow">
+              <ShieldCheck className="w-6 h-6" />
             </div>
-            <h1 className="font-bold text-lg tracking-tight">ProSe Legal DB</h1>
+            <h1 className="font-bold text-lg tracking-tight text-center">ProSe Legal DB</h1>
           </div>
-          <p className="text-[10px] text-orange-400/70 uppercase tracking-[0.2em] font-bold">Cathedral Framework</p>
+          <p className="text-[10px] text-orange-400/70 uppercase tracking-[0.2em] font-bold text-center">Cathedral Framework</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto scrollbar-hide">
@@ -1375,14 +1518,28 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
                       onAnalyze={handleAnalyzeFile}
                       onClassify={(id, category) => {
                         const warnings = validateClassification(id, category);
+                        const newCats = fileCategories[id] 
+                          ? [...fileCategories[id], category].filter((v, i, a) => a.indexOf(v) === i)
+                          : [category];
+                        
                         setFileCategories(prev => ({
                           ...prev,
-                          [id]: prev[id] ? [...prev[id], category].filter((v, i, a) => a.indexOf(v) === i) : [category]
+                          [id]: newCats
                         }));
+                        
+                        // REFLEXIVE INTAKE: Auto-create timeline entry when classified
+                        const file = files.find(f => f.id === id);
+                        if (file && newCats.length > 0) {
+                          const flags = fileFlags[id] || [];
+                          createTimelineEntryFromFile(id, newCats, file.note, flags);
+                        }
+                        
                         showNotification(`✅ Classified as ${category}`);
                         return warnings;
                       }}
                       categories={fileCategories[file.id] || []}
+                      flags={fileFlags[file.id] || []}
+                      isPendingClassification={pendingClassification?.fileId === file.id}
                       onPredictCategory={predictFileCategory}
                       onStartTranscription={startTranscription}
                       isTranscribing={isTranscribing && transcriptionTarget?.id === file.id}
