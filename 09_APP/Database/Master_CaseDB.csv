@@ -1,0 +1,7 @@
+event_id,date,short_title,description,description_neutral,source,exhibitrefs,category,priority,status
+EVT-001,2024-01-15,Initial Filing,Petition for custody filed with Montgomery County Court,Petition for custody filed with Montgomery County Court on 2024-01-15,COURT_FILING,EXH-001,Legal_Filing,High,Complete
+EVT-002,2024-02-20,Mediation Session,Attended court-ordered mediation session,Attended court-ordered mediation session on 2024-02-20,COURT_FILING,EXH-002,Mediation,Medium,Complete
+EVT-003,2024-03-10,Parenting Plan Submitted,Submitted proposed parenting plan to court,Submitted proposed parenting plan to court on 2024-03-10,COURT_FILING,EXH-003,Legal_Filing,High,Complete
+EVT-004,2024-04-05,Communication Received,Received text message regarding visitation schedule,Received text message on 2024-04-05 regarding proposed visitation schedule,COMMUNICATION,EXH-004,Communication,Medium,Complete
+EVT-005,2024-05-12,Hearing Scheduled,Status conference hearing scheduled for June 15,Status conference hearing scheduled for June 15, 2024,COURT_FILING,EXH-005,Legal_Filing,Critical,Pending
+
