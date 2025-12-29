@@ -41,6 +41,9 @@ import SmartSticky from './components/SmartSticky';
 import { useStickyNotes } from './lib/useStickyNotes';
 import SwimlaneTimeline from './components/SwimlaneTimeline';
 import FloatingNoteConsole from './components/FloatingNoteConsole';
+import MotionBuilder from './components/MotionBuilder';
+import DeadlineTracker from './components/DeadlineTracker';
+import ContradictionDetector from './components/ContradictionDetector';
 
 // --- Constants & Types ---
 const LS_KEY = "PROSE_LEGAL_DB_V3";
@@ -1399,6 +1402,17 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
             <BrainCircuit className="w-4 h-4" /> Strategic Analyzer
           </button>
 
+          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest text-center">📄 Document Tools</div>
+          <button onClick={() => setView('motion')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'motion' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
+            <FileText className="w-4 h-4" /> Motion Builder
+          </button>
+          <button onClick={() => setView('deadlines')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'deadlines' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
+            <Calendar className="w-4 h-4" /> Deadline Tracker
+          </button>
+          <button onClick={() => setView('contradictions')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'contradictions' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
+            <AlertCircle className="w-4 h-4" /> Contradiction Detector
+          </button>
+
           <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest text-center">Utilities</div>
           <button onClick={() => setView('import')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'import' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
             <Upload className="w-4 h-4" /> Import CSV
@@ -1444,6 +1458,9 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
             <h2 className="text-xl font-bold capitalize flex items-center gap-2">
               {view === 'strategy' && <Sparkles className="w-5 h-5 text-blue-500" />}
               {view === 'organizer' && <ScanLine className="w-5 h-5 text-blue-500" />}
+              {view === 'motion' && <FileText className="w-5 h-5 text-blue-500" />}
+              {view === 'deadlines' && <Calendar className="w-5 h-5 text-blue-500" />}
+              {view === 'contradictions' && <AlertCircle className="w-5 h-5 text-blue-500" />}
               {view.replace('_', ' ')}
             </h2>
           </div>
@@ -1651,6 +1668,18 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
                 </div>
               </div>
             </div>
+          )}
+
+          {view === 'motion' && (
+            <MotionBuilder events={events} exhibits={exhibits} />
+          )}
+
+          {view === 'deadlines' && (
+            <DeadlineTracker />
+          )}
+
+          {view === 'contradictions' && (
+            <ContradictionDetector events={events} />
           )}
 
           {view === 'import' && (

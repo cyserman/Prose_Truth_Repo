@@ -53,6 +53,12 @@ npm run dev
 09_APP/         - React application tooling
 ```
 
+## 📚 DOCUMENTATION
+
+- **[USER_GUIDE.md](./USER_GUIDE.md)** - Complete user instruction manual with step-by-step guides
+- **[FEATURES.md](./FEATURES.md)** - Comprehensive feature list and capabilities
+- **[README.md](./README.md)** - This file (technical setup and overview)
+
 ## CORE FEATURES
 
 ### Timeline-First Strategy
@@ -60,16 +66,26 @@ npm run dev
 - Exhibit linkage system
 - Neutralization of emotional language
 - Print-to-PDF court-ready output
+- **Swimlane timeline views** with customizable profiles
 
 ### Evidence Management
 - Categorized exhibit system (CL, FIN, PKT, VEH, etc.)
 - OCR processing pipeline
 - Index generation
+- **Reflexive intake agent** with logic checks
+- **Floating note console** for quick annotations
 
 ### AI Integration
 - Strategic analysis via Gemini API
 - Automated summary generation
 - Gap analysis and consistency checking
+- **Contradiction detector** for cross-examination prep
+- **Motion/Affidavit builder** for document generation
+
+### Document Tools
+- **Motion Builder** - Generate court documents from timeline
+- **Deadline Tracker** - Never miss a court date
+- **Contradiction Detector** - Find inconsistencies automatically
 
 ## RESTORE SCRIPT
 
