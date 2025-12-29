@@ -1,0 +1,51 @@
+name: Accessibility Testing
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '09_APP/prose-legal-db-app/src/**'
+      - '09_APP/prose-legal-db-app/public/**'
+
+jobs:
+  accessibility-audit:
+    name: A11y Audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 09_APP/prose-legal-db-app
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 09_APP/prose-legal-db-app/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build app
+        run: npm run build
+      
+      - name: Start dev server
+        run: npm run dev &
+        
+      - name: Wait for server
+        run: npx wait-on http://localhost:5173 --timeout 30000
+      
+      - name: Run accessibility audit
+        run: bash scripts/accessibility-audit.sh
+        env:
+          BASE_URL: http://localhost:5173
+      
+      - name: Upload accessibility reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-reports
+          path: 09_APP/prose-legal-db-app/a11y-reports/
+
