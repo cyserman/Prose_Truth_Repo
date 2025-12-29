@@ -1,16 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+/* Cathedral Framework - Professional Legal UI */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --color-night-bg: #0a1435;
+  --color-night-card: rgba(45, 74, 124, 0.6);
+  --color-ember-warm: #fb923c;
+  --color-ember-soft: #fdba74;
+  --glow-ember: 0 0 30px rgba(251, 146, 60, 0.25);
+  
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Textured Background Patterns */
+.bg-textured-blue {
+  background-color: #0a1435;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(31, 59, 131, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(15, 23, 42, 0.4) 0%, transparent 50%),
+    url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%231f3b83" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+  background-size: 100% 100%, 100% 100%, 60px 60px;
+}
+
+.bg-textured-light {
+  background-color: #fafafa;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(241, 245, 249, 0.8) 0%, transparent 50%),
+    url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23e2e8f0" fill-opacity="0.3"%3E%3Cpath d="M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h20v2h20V0h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20v2h20v2h-20z"/%3E%3C/g%3E%3C/svg%3E');
+  background-size: 100% 100%, 40px 40px;
+}
+
+.bg-textured-dark {
+  background-color: #0c0c1a;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(30, 41, 59, 0.5) 0%, transparent 50%),
+    url('data:image/svg+xml,%3Csvg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%231e293b" fill-opacity="0.4"%3E%3Cpath d="M50 50c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10zm4 0c0 7.732-6.268 14-14 14s-14-6.268-14-14 6.268-14 14-14 14 6.268 14 14z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+  background-size: 100% 100%, 80px 80px;
 }
 
 a {
@@ -24,10 +59,14 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: linear-gradient(135deg, #0a1435 0%, #1e3a5f 50%, #0a1435 100%);
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(31, 59, 131, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(15, 23, 42, 0.2) 0%, transparent 50%);
+  background-attachment: fixed;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -52,6 +91,115 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Glassmorphism Cards - Cathedral Framework */
+@layer components {
+  .glass-warm {
+    background: rgba(45, 74, 124, 0.4);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-dark {
+    background: rgba(45, 74, 124, 0.5);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .card-cozy {
+    background: linear-gradient(135deg, rgba(45, 74, 124, 0.6) 0%, rgba(26, 26, 82, 0.7) 100%);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-dark {
+    background: linear-gradient(135deg, rgba(45, 74, 124, 0.65) 0%, rgba(30, 58, 95, 0.75) 100%);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-dark:hover {
+    background: linear-gradient(135deg, rgba(45, 74, 124, 0.75) 0%, rgba(30, 58, 95, 0.85) 100%);
+    border-color: rgba(251, 146, 60, 0.3);
+    box-shadow: 
+      0 8px 40px rgba(251, 146, 60, 0.15),
+      0 0 0 1px rgba(251, 146, 60, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Ember Buttons - Warm Orange Accents */
+  .btn-ember {
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+    color: white;
+    font-weight: 600;
+    border-radius: 9999px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+      0 4px 16px rgba(251, 146, 60, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-ember:hover {
+    background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 32px rgba(251, 146, 60, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-ember:active {
+    transform: translateY(0px) scale(0.97);
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(251, 146, 60, 0.25); }
+  50% { box-shadow: 0 0 35px rgba(251, 146, 60, 0.4); }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @media (prefers-color-scheme: light) {

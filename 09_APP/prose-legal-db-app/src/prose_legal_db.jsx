@@ -35,6 +35,8 @@ import {
   Square,
   FileJson
 } from 'lucide-react';
+import SmartSticky from './components/SmartSticky';
+import { useStickyNotes } from './lib/useStickyNotes';
 
 // --- Constants & Types ---
 const LS_KEY = "PROSE_LEGAL_DB_V3";
@@ -77,6 +79,40 @@ const INITIAL_EVENTS = [
     description_original: '',
     source: 'AppClose Screenshots',
     exhibit_code: 'CL-018',
+    reliability: 'High'
+  },
+  // Imported from sticky_index.json (real case data)
+  {
+    event_id: 'sticky-2024-03-10',
+    event_date: '2024-03-10',
+    event_type: 'Communication',
+    short_title: 'Wife blocked Sunday call',
+    description: 'Scheduled Sunday call with children was blocked. Pattern of contact interference documented.',
+    description_original: 'Wife blocked Sunday call',
+    source: 'Call logs',
+    exhibit_code: 'CUST-002, CUST-004',
+    reliability: 'High'
+  },
+  {
+    event_id: 'sticky-2024-06-01',
+    event_date: '2024-06-01',
+    event_type: 'Other',
+    short_title: 'Kids mention baby sister',
+    description: 'Children referenced baby sister during visit. Statement recorded with neutral tone.',
+    description_original: 'Kids mention baby sister',
+    source: 'Direct observation',
+    exhibit_code: 'KIDS-001',
+    reliability: 'High'
+  },
+  {
+    event_id: 'sticky-2024-05-05',
+    event_date: '2024-05-05',
+    event_type: 'Vehicle',
+    short_title: 'Ricky vehicle overnight at marital home',
+    description: 'Third-party vehicle observed at marital residence overnight. One data point toward cohabitation pattern.',
+    description_original: 'Ricky vehicle overnight at marital home',
+    source: 'Photographic evidence',
+    exhibit_code: 'SAFE-002',
     reliability: 'High'
   }
 ];
@@ -221,6 +257,7 @@ const Card = ({ children, className = "" }) => (
 
 const DragDropZone = ({ onFileSelect, title, sub, icon: Icon, accept = "*", multiple = false }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
   const handleDrag = (e) => {
     e.preventDefault(); e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") setIsDragging(true);
@@ -235,18 +272,29 @@ const DragDropZone = ({ onFileSelect, title, sub, icon: Icon, accept = "*", mult
   };
   return (
     <div onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
-      className={`relative border-2 border-dashed rounded-2xl p-8 transition-all flex flex-col items-center justify-center text-center group cursor-pointer h-48 ${isDragging ? 'border-blue-500 bg-blue-50 scale-[1.02]' : 'border-slate-200 bg-white hover:border-blue-400 hover:bg-slate-50'}`}>
-      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept={accept} multiple={multiple} onChange={handleChange} />
-      <div className={`p-4 rounded-full mb-4 transition-colors ${isDragging ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-500'}`}><Icon className="w-8 h-8" /></div>
-      <h4 className="font-bold text-slate-900 mb-1">{title}</h4>
-      <p className="text-xs text-slate-500">{sub}</p>
+      className={`relative border-4 border-dashed rounded-2xl p-8 transition-all flex flex-col items-center justify-center text-center group cursor-pointer min-h-[200px] ${isDragging ? 'border-blue-500 bg-blue-50 scale-[1.02]' : 'border-blue-300 bg-blue-50/30 hover:border-blue-400 hover:bg-blue-50'}`}>
+      <input ref={fileInputRef} type="file" className="hidden" accept={accept} multiple={multiple} onChange={handleChange} />
+      <div className={`p-4 rounded-full mb-4 transition-colors ${isDragging ? 'bg-blue-200 text-blue-700' : 'bg-blue-100 text-blue-600'}`}><Icon className="w-10 h-10" /></div>
+      <h4 className="font-bold text-lg text-slate-900 mb-2">{title}</h4>
+      <p className="text-sm text-slate-600 mb-4">{sub}</p>
+      <button 
+        onClick={() => fileInputRef.current?.click()}
+        className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+      >
+        Choose File
+      </button>
+      <p className="text-xs text-slate-500 mt-3">or drag & drop here</p>
     </div>
   );
 };
 
-const FileOrganizerCard = ({ fileData, onUpdateNote, onDelete, onStatusChange, onAnalyze }) => {
+const FILE_CATEGORIES = ['Incident', 'Communication', 'Evidence', 'Court Filing', 'Note', 'Other'];
+
+const FileOrganizerCard = ({ fileData, onUpdateNote, onDelete, onStatusChange, onAnalyze, onClassify, categories = [], onPredictCategory, onStartTranscription, isTranscribing, transcriptionText }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isClassifying, setIsClassifying] = useState(false);
+  const [logicWarnings, setLogicWarnings] = useState([]);
   
   const getIcon = (type) => {
     if (type.includes('image')) return FileImage;
@@ -296,16 +344,117 @@ const FileOrganizerCard = ({ fileData, onUpdateNote, onDelete, onStatusChange, o
         </div>
       </div>
       <div className="p-4 flex-1">
-        <div className="flex gap-2 mb-3"><Badge className={getStatusColor(fileData.status)}>{fileData.status}</Badge></div>
+        <div className="flex gap-2 mb-3 flex-wrap">
+          <Badge className={getStatusColor(fileData.status)}>{fileData.status}</Badge>
+          {categories.length > 0 && categories.map(cat => (
+            <Badge key={cat} className="bg-indigo-100 text-indigo-700 border-indigo-200">{cat}</Badge>
+          ))}
+        </div>
+        {isClassifying ? (
+          <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+            <div className="text-xs font-bold text-indigo-900 mb-2">Classify File:</div>
+            {logicWarnings.length > 0 && (
+              <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded text-[10px] text-amber-800">
+                {logicWarnings.map((w, i) => <div key={i}>{w}</div>)}
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {FILE_CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => {
+                    if (onClassify) {
+                      const warnings = onClassify(fileData.id, cat);
+                      setLogicWarnings(warnings || []);
+                    }
+                    setIsClassifying(false);
+                  }}
+                  className="px-2 py-1 text-[10px] bg-white border border-indigo-300 rounded hover:bg-indigo-100 transition"
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button onClick={() => setIsClassifying(false)} className="text-[10px] text-indigo-600 hover:underline">Cancel</button>
+              {onPredictCategory && (
+                <button 
+                  onClick={() => {
+                    onPredictCategory(fileData.id);
+                    setIsClassifying(false);
+                  }}
+                  className="text-[10px] text-indigo-600 hover:underline flex items-center gap-1"
+                >
+                  <Sparkles className="w-3 h-3" /> AI Suggest
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="mb-3 flex gap-2">
+            <button
+              onClick={() => setIsClassifying(true)}
+              className="flex-1 px-2 py-1 text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition flex items-center justify-center gap-1"
+            >
+              <Package className="w-3 h-3" /> {categories.length > 0 ? 'Edit Classification' : 'Classify File'}
+            </button>
+            {onPredictCategory && (
+              <button
+                onClick={() => onPredictCategory(fileData.id)}
+                className="px-2 py-1 text-[10px] bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition"
+                title="AI category prediction"
+              >
+                <Sparkles className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        )}
         <div className="text-xs text-slate-500 mb-1 font-bold">System Usage:</div>
         <div className="text-xs text-slate-700 bg-slate-50 p-2 rounded border border-slate-200 mb-4 min-h-[2.5em]">{fileData.usage || "Unassigned - Pending Indexing"}</div>
         <div className="relative group/note">
-          <div className="absolute -top-2 left-2 bg-yellow-200 text-yellow-800 text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm flex items-center gap-1 z-10"><StickyNote className="w-3 h-3" /> STICKY NOTE</div>
+          <div className="absolute -top-2 left-2 bg-yellow-200 text-yellow-800 text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm flex items-center gap-1 z-10">
+            <StickyNote className="w-3 h-3" /> STICKY NOTE
+            {onStartTranscription && (
+              <button
+                onClick={() => onStartTranscription('file', fileData.id)}
+                className="ml-1 p-0.5 hover:bg-yellow-300 rounded"
+                title="Voice transcription"
+              >
+                <Mic className={`w-2.5 h-2.5 ${isTranscribing ? 'text-red-600 animate-pulse' : ''}`} />
+              </button>
+            )}
+          </div>
           {isAnalyzing ? (
             <div className="w-full bg-yellow-50 border border-yellow-200 rounded-lg h-24 flex flex-col items-center justify-center text-xs text-yellow-800 animate-pulse"><Loader2 className="w-4 h-4 mb-1 animate-spin" />Scanning Doc...</div>
           ) : (
-            <textarea className="w-full bg-yellow-50 border border-yellow-200 rounded-lg p-3 pt-4 text-xs text-slate-700 leading-relaxed resize-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none shadow-sm h-24 placeholder-yellow-800/30 font-mono"
-              placeholder="Add instructions, context, or AI directives here..." value={fileData.note} onChange={(e) => onUpdateNote(fileData.id, e.target.value)} />
+            <>
+              <textarea 
+                className="w-full bg-yellow-50 border border-yellow-200 rounded-lg p-3 pt-4 text-xs text-slate-700 leading-relaxed resize-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none shadow-sm h-24 placeholder-yellow-800/30 font-mono"
+                placeholder="Add instructions, context, or AI directives here..." 
+                value={fileData.note} 
+                onChange={(e) => onUpdateNote(fileData.id, e.target.value)} 
+              />
+              {isTranscribing && (
+                <div className="absolute bottom-2 right-2 flex items-center gap-2">
+                  <div className="bg-red-100 text-red-700 text-[9px] px-2 py-1 rounded flex items-center gap-1">
+                    <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
+                    Listening...
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (onStartTranscription) {
+                        const currentNote = fileData.note || '';
+                        onUpdateNote(fileData.id, currentNote + (currentNote ? '\n\n' : '') + transcriptionText);
+                        onStartTranscription(null, null);
+                      }
+                    }}
+                    className="bg-red-600 text-white text-[9px] px-2 py-1 rounded hover:bg-red-700"
+                  >
+                    Stop & Save
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -325,6 +474,16 @@ export default function ProSeLegalDB() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [neutralizingId, setNeutralizingId] = useState(null);
+  const [csvPaste, setCsvPaste] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [isLoadingSeed, setIsLoadingSeed] = useState(false);
+  
+  // Theme state
+  const [theme, setTheme] = useState('light'); // 'light', 'dark', 'textured'
+  
+  // Classification state for files
+  const [classifyingFileId, setClassifyingFileId] = useState(null);
+  const [fileCategories, setFileCategories] = useState({});
   
   // Microphone recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -332,6 +491,15 @@ export default function ProSeLegalDB() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const recordingIntervalRef = useRef(null);
+  
+  // Voice transcription state
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcriptionText, setTranscriptionText] = useState('');
+  const recognitionRef = useRef(null);
+  const [transcriptionTarget, setTranscriptionTarget] = useState(null); // {type: 'file'|'event', id: string}
+
+  // Sticky notes
+  const { notes, addNote, updateNote, deleteNote } = useStickyNotes();
 
   useEffect(() => {
     try {
@@ -341,6 +509,8 @@ export default function ProSeLegalDB() {
         if (parsed.events) setEvents(parsed.events);
         if (parsed.exhibits) setExhibits(parsed.exhibits);
         if (parsed.files) setFiles(parsed.files.map(f => ({...f, fileObj: null}))); 
+        if (parsed.fileCategories) setFileCategories(parsed.fileCategories);
+        if (parsed.theme) setTheme(parsed.theme);
       }
     } catch (e) {
       console.error("Failed to load from local storage", e);
@@ -348,9 +518,15 @@ export default function ProSeLegalDB() {
   }, []);
 
   useEffect(() => {
-    const payload = { events, exhibits, files: files.map(f => ({...f, fileObj: null})) };
+    const payload = { 
+      events, 
+      exhibits, 
+      files: files.map(f => ({...f, fileObj: null})),
+      fileCategories,
+      theme
+    };
     localStorage.setItem(LS_KEY, JSON.stringify(payload));
-  }, [events, exhibits, files]);
+  }, [events, exhibits, files, fileCategories, theme]);
 
   // Cleanup recording on unmount
   useEffect(() => {
@@ -500,6 +676,135 @@ export default function ProSeLegalDB() {
     }
   };
 
+  // --- VOICE TRANSCRIPTION (Web Speech API) ---
+  const startTranscription = (targetType, targetId) => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      showNotification('❌ Speech recognition not supported. Try Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    setTranscriptionTarget({ type: targetType, id: targetId });
+    setIsTranscribing(true);
+    setTranscriptionText('');
+
+    recognition.onstart = () => {
+      showNotification('🎤 Listening... Speak now');
+    };
+
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' ';
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      setTranscriptionText(prev => prev + finalTranscript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error === 'no-speech') {
+        showNotification('⚠️ No speech detected. Try again.');
+      } else {
+        showNotification('❌ Transcription error: ' + event.error);
+      }
+      stopTranscription();
+    };
+
+    recognition.onend = () => {
+      stopTranscription();
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopTranscription = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsTranscribing(false);
+    
+    if (transcriptionTarget && transcriptionText.trim()) {
+      if (transcriptionTarget.type === 'file' && transcriptionTarget.id) {
+        const currentNote = files.find(f => f.id === transcriptionTarget.id)?.note || '';
+        updateFileNote(transcriptionTarget.id, currentNote + (currentNote ? '\n\n' : '') + transcriptionText.trim());
+        showNotification('✅ Transcription added to file note');
+      } else if (transcriptionTarget.type === 'event') {
+        // Could add to event description or note
+        showNotification('✅ Transcription ready');
+      }
+    }
+    
+    setTranscriptionTarget(null);
+    setTranscriptionText('');
+  };
+
+  // --- AI CATEGORY PREDICTION ---
+  const predictFileCategory = async (fileId) => {
+    const file = files.find(f => f.id === fileId);
+    if (!file || !file.note) {
+      showNotification('⚠️ File needs a note or description for AI prediction');
+      return;
+    }
+
+    try {
+      const prompt = `Analyze this legal file description and suggest the most appropriate category(s) from this list: Incident, Communication, Evidence, Court Filing, Note, Other.
+
+File description: "${file.note}"
+
+Respond with ONLY the category name(s) separated by commas. If multiple apply, list them all. Example: "Evidence, Incident"`;
+
+      const result = await callGemini(prompt);
+      const suggested = result.split(',').map(c => c.trim()).filter(c => FILE_CATEGORIES.includes(c));
+      
+      if (suggested.length > 0) {
+        setFileCategories(prev => ({
+          ...prev,
+          [fileId]: [...new Set([...(prev[fileId] || []), ...suggested])]
+        }));
+        showNotification(`🤖 AI suggests: ${suggested.join(', ')}`);
+      } else {
+        showNotification('🤖 AI could not determine category');
+      }
+    } catch (error) {
+      console.error('Category prediction error:', error);
+      showNotification('❌ AI prediction failed');
+    }
+  };
+
+  // --- LOGIC CHECKS (Incident ↔ Evidence) ---
+  const validateClassification = (fileId, newCategory) => {
+    const currentCats = fileCategories[fileId] || [];
+    const willHaveIncident = currentCats.includes('Incident') || newCategory === 'Incident';
+    const willHaveEvidence = currentCats.includes('Evidence') || newCategory === 'Evidence';
+    
+    const warnings = [];
+    
+    if (willHaveIncident && !willHaveEvidence) {
+      warnings.push('⚠️ Incident without Evidence? Consider adding supporting documents.');
+    }
+    
+    if (willHaveEvidence && !willHaveIncident) {
+      warnings.push('⚠️ Evidence without linked Incident? Consider linking to an event.');
+    }
+    
+    return warnings;
+  };
+
   // --- MASTER NARRATIVE IMPORT ---
   const handleMasterNarrativeImport = (file) => {
     const reader = new FileReader();
@@ -630,16 +935,24 @@ export default function ProSeLegalDB() {
       if (result) {
         const match = result.match(/Neutralized Description:\s*([\s\S]*?)(?=\n\d\.|\n\*\*|$)/i);
         const neutralized = match ? match[1].trim() : result;
+        // CORRECT PATTERN: Preserve original in description, store AI output in description_neutral
         setEvents(prev => prev.map(e => {
           if (e.event_id === eventId) {
-            return { ...e, description: neutralized, description_original: e.description_original || currentDescription };
+            return { 
+              ...e, 
+              description_neutral: neutralized,
+              // Preserve original description if not already set
+              description_original: e.description_original || currentDescription
+            };
           }
           return e;
         }));
         setAnalysisResult(result);
+        showNotification('✅ Neutral draft saved (original preserved)');
       }
     } catch (error) {
       console.error("Gemini Neutralize Error:", error);
+      showNotification('❌ Neutralize failed: ' + (error?.message || 'Unknown error'));
     } finally {
       setNeutralizingId(null);
     }
@@ -681,12 +994,179 @@ export default function ProSeLegalDB() {
     link.click();
   };
 
+  const exportMarkdown = () => {
+    let md = `# ProSe Legal Case Timeline\n\n`;
+    md += `**Generated:** ${new Date().toLocaleString()}\n\n`;
+    md += `---\n\n`;
+    
+    filteredEvents.forEach(event => {
+      md += `## ${event.event_date} - ${event.short_title}\n\n`;
+      md += `**Type:** ${event.event_type}\n\n`;
+      md += `**Description:**\n${event.description}\n\n`;
+      if (event.description_neutral) {
+        md += `**Neutral Draft:**\n${event.description_neutral}\n\n`;
+      }
+      if (event.exhibit_code) {
+        md += `**Exhibit:** ${event.exhibit_code}\n\n`;
+      }
+      md += `---\n\n`;
+    });
+    
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `timeline_${new Date().toISOString().split('T')[0]}.md`;
+    link.click();
+    showNotification('✅ Markdown exported');
+  };
+
+  const exportPDF = () => {
+    setView('print');
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => setView('timeline'), 500);
+    }, 100);
+  };
+
   const clearStorage = () => {
     if(confirm("Are you sure? This will wipe all local data.")) {
         localStorage.removeItem(LS_KEY);
         setEvents(INITIAL_EVENTS);
         setExhibits([]);
         setFiles([]);
+    }
+  };
+
+  // --- PASTE IMPORT (fallback when file chooser is fussy) ---
+  const handlePasteImport = () => {
+    if (!csvPaste.trim()) {
+      showNotification("Paste area is empty");
+      return;
+    }
+    setIsImporting(true);
+    try {
+      const rows = parseCSV(csvPaste);
+      if (!rows.length) {
+        showNotification("No rows found in pasted CSV");
+        setIsImporting(false);
+        return;
+      }
+      const headers = rows[0].map((h) => (h ?? '').toLowerCase().trim());
+      const idxDate = headers.indexOf('date');
+      const idxTitle = headers.indexOf('title');
+      const idxDesc = headers.indexOf('description');
+      const idxDescNeutral = headers.indexOf('description_neutral');
+      const idxExhibits = headers.indexOf('exhibitrefs');
+      const idxSource = headers.indexOf('source');
+
+      const imported = [];
+      rows.slice(1).forEach((r) => {
+        const date = idxDate >= 0 ? r[idxDate]?.trim() : '';
+        const title = idxTitle >= 0 ? r[idxTitle]?.trim() : '';
+        const description = idxDesc >= 0 ? r[idxDesc]?.trim() : '';
+        const description_neutral = idxDescNeutral >= 0 ? r[idxDescNeutral]?.trim() : '';
+        const exhibitRefs = idxExhibits >= 0 ? r[idxExhibits]?.trim() : '';
+        const source = idxSource >= 0 ? (r[idxSource]?.trim() || 'import') : 'import';
+
+        if (!date && !title && !description && !exhibitRefs && !description_neutral) return;
+
+        imported.push({
+          id: `EVT-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+          event_date: date,
+          event_type: 'Communication',
+          short_title: title || '(untitled)',
+          description, // Original description
+          description_neutral: description_neutral || '', // AI-neutralized version
+          description_original: description, // Preserve original
+          source,
+          exhibit_code: exhibitRefs,
+          reliability: 'High',
+        });
+      });
+
+      if (!imported.length) {
+        showNotification("Nothing importable found in pasted CSV");
+        setIsImporting(false);
+        return;
+      }
+
+      setEvents((prev) => [...prev, ...imported]);
+      showNotification(`Imported ${imported.length} event(s) from paste`);
+      setCsvPaste('');
+    } catch (err) {
+      console.error(err);
+      showNotification("Paste import failed. Check format.");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  // --- SEED IMPORT (pull from public/seed_timeline.csv for reliability) ---
+  const handleSeedImport = async () => {
+    setIsLoadingSeed(true);
+    try {
+      const res = await fetch('/seed_timeline.csv', { cache: 'no-store' });
+      if (!res.ok) {
+        showNotification('Seed file not found (seed_timeline.csv)');
+        setIsLoadingSeed(false);
+        return;
+      }
+      const text = await res.text();
+      const rows = parseCSV(text);
+      if (!rows.length) {
+        showNotification('Seed CSV is empty');
+        setIsLoadingSeed(false);
+        return;
+      }
+      const headers = rows[0].map((h) => (h ?? '').toLowerCase().trim());
+      const idxDate = headers.indexOf('date');
+      const idxTitle = headers.indexOf('title');
+      const idxDesc = headers.indexOf('description');
+      const idxDescNeutral = headers.indexOf('description_neutral');
+      const idxExhibits = headers.indexOf('exhibitrefs');
+      const idxSource = headers.indexOf('source');
+
+      const imported = [];
+      rows.slice(1).forEach((r) => {
+        const date = idxDate >= 0 ? r[idxDate]?.trim() : '';
+        const title = idxTitle >= 0 ? r[idxTitle]?.trim() : '';
+        const description = idxDesc >= 0 ? r[idxDesc]?.trim() : '';
+        const description_neutral = idxDescNeutral >= 0 ? r[idxDescNeutral]?.trim() : '';
+        const exhibitRefs = idxExhibits >= 0 ? r[idxExhibits]?.trim() : '';
+        const source = idxSource >= 0 ? (r[idxSource]?.trim() || 'import') : 'import';
+
+        if (!date && !title && !description && !exhibitRefs && !description_neutral) return;
+
+        imported.push({
+          event_id: `EVT-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+          event_date: date,
+          event_type: 'Communication',
+          short_title: title || '(untitled)',
+          description, // Original description
+          description_neutral: description_neutral || '', // AI-neutralized version
+          description_original: description, // Preserve original
+          source,
+          exhibit_code: exhibitRefs,
+          reliability: 'High',
+        });
+      });
+
+      if (!imported.length) {
+        showNotification('Seed CSV had no usable rows');
+        setIsLoadingSeed(false);
+        return;
+      }
+
+      setEvents((prev) => [...prev, ...imported]);
+      showNotification(`Imported ${imported.length} event(s) from seed`);
+      // move to timeline to show results
+      setView('timeline');
+    } catch (err) {
+      console.error(err);
+      showNotification('Seed import failed');
+    } finally {
+      setIsLoadingSeed(false);
     }
   };
 
@@ -723,60 +1203,88 @@ export default function ProSeLegalDB() {
     );
   }
 
+  // Theme background classes
+  const getThemeClass = () => {
+    switch(theme) {
+      case 'textured': return 'bg-textured-blue';
+      case 'dark': return 'bg-textured-dark';
+      default: return 'bg-textured-light';
+    }
+  };
+
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
+    <div className={`flex h-screen ${getThemeClass()} text-slate-900 font-sans overflow-hidden`}>
       {notification && (
         <div className="fixed bottom-6 right-6 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm animate-in fade-in slide-in-from-bottom-2">
           {notification}
         </div>
       )}
 
-      <aside className="w-72 bg-slate-950 text-white flex flex-col shrink-0">
-        <div className="p-6 border-b border-slate-800">
+      <aside className="w-72 glass-dark text-white flex flex-col shrink-0 border-r border-white/10">
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-3 mb-1">
-            <div className="bg-blue-600 p-1.5 rounded shadow-lg shadow-blue-900/20">
+            <div className="bg-blue-600 p-1.5 rounded shadow-lg shadow-blue-900/20 animate-glow">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <h1 className="font-bold text-lg tracking-tight">ProSe Legal DB</h1>
           </div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-bold">Cathedral Framework</p>
+          <p className="text-[10px] text-orange-400/70 uppercase tracking-[0.2em] font-bold">Cathedral Framework</p>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
-          <button onClick={() => setView('timeline')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'timeline' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-900'}`}>
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto scrollbar-hide">
+          <button onClick={() => setView('timeline')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'timeline' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
             <Calendar className="w-4 h-4" /> Timeline
           </button>
           
-          <button onClick={() => setView('organizer')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'organizer' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-900'}`}>
+          <button onClick={() => setView('organizer')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'organizer' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
             <ScanLine className="w-4 h-4" /> Evidence Organizer
-            <span className="ml-auto bg-slate-800 text-[10px] px-1.5 py-0.5 rounded-full">{files.length}</span>
+            <span className="ml-auto bg-slate-800/50 text-[10px] px-1.5 py-0.5 rounded-full border border-white/10">{files.length}</span>
           </button>
           
-          <button onClick={() => setView('exhibits')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'exhibits' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-900'}`}>
+          <button onClick={() => setView('exhibits')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'exhibits' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
             <Package className="w-4 h-4" /> Exhibit Index
           </button>
           
-          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest">✨ Gemini Analysis</div>
-          <button onClick={runStrategicAnalysis} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'strategy' ? 'bg-indigo-600 text-white' : 'text-indigo-400 hover:bg-indigo-950/30'}`}>
+          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest">✨ Gemini Analysis</div>
+          <button onClick={runStrategicAnalysis} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'strategy' ? 'btn-ember text-white font-bold' : 'text-indigo-300 hover:bg-indigo-950/30 hover:text-indigo-200'}`}>
             <BrainCircuit className="w-4 h-4" /> Strategic Analyzer
           </button>
 
-          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Utilities</div>
-          <button onClick={() => setView('import')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'import' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-900'}`}>
+          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest">Utilities</div>
+          <button onClick={() => setView('import')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'import' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
             <Upload className="w-4 h-4" /> Import CSV
           </button>
-          <button onClick={exportBackup} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-400 hover:bg-slate-900 transition text-sm">
+          <button onClick={exportBackup} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-white/5 hover:text-white transition text-sm">
             <Download className="w-4 h-4" /> Export JSON
           </button>
+          <button onClick={exportMarkdown} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-white/5 hover:text-white transition text-sm">
+            <FileText className="w-4 h-4" /> Export Markdown
+          </button>
+          <button onClick={exportPDF} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-white/5 hover:text-white transition text-sm">
+            <Printer className="w-4 h-4" /> Export PDF
+          </button>
+          
+          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest">Theme</div>
+          <div className="px-4 space-y-1">
+            <button onClick={() => setTheme('light')} className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm ${theme === 'light' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
+              ☀️ Light
+            </button>
+            <button onClick={() => setTheme('dark')} className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm ${theme === 'dark' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
+              🌙 Dark
+            </button>
+            <button onClick={() => setTheme('textured')} className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm ${theme === 'textured' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
+              🎨 Textured Blue
+            </button>
+          </div>
         </nav>
         
-        <div className="p-4 bg-slate-900/50 m-4 rounded-xl border border-slate-800">
+        <div className="p-4 card-cozy m-4 rounded-xl">
            <div className="flex justify-between items-center mb-1">
              <div className="flex items-center gap-2">
-               <div className="w-2 h-2 rounded-full bg-green-500"></div>
-               <span className="text-[10px] font-bold text-slate-400 uppercase">Auto-Save On</span>
+               <div className="w-2 h-2 rounded-full bg-green-400 animate-glow"></div>
+               <span className="text-[10px] font-bold text-slate-300 uppercase">Auto-Save On</span>
              </div>
-             <button onClick={clearStorage} className="text-[10px] text-red-500 hover:underline">Clear Data</button>
+             <button onClick={clearStorage} className="text-[10px] text-red-400 hover:text-red-300 hover:underline">Clear Data</button>
            </div>
         </div>
       </aside>
@@ -791,7 +1299,15 @@ export default function ProSeLegalDB() {
             </h2>
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setView('print')} className="bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-800 transition shadow-sm">
+            <button 
+              onClick={() => setView('print')} 
+              disabled={filteredEvents.length === 0}
+              className={`px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-bold transition shadow-lg ${
+                filteredEvents.length === 0 
+                  ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+                  : 'btn-ember'
+              }`}
+            >
               <Printer className="w-4 h-4" /> Print Judge-Ready PDF
             </button>
           </div>
@@ -857,6 +1373,20 @@ export default function ProSeLegalDB() {
                       onStatusChange={updateFileStatus}
                       onDelete={deleteFile}
                       onAnalyze={handleAnalyzeFile}
+                      onClassify={(id, category) => {
+                        const warnings = validateClassification(id, category);
+                        setFileCategories(prev => ({
+                          ...prev,
+                          [id]: prev[id] ? [...prev[id], category].filter((v, i, a) => a.indexOf(v) === i) : [category]
+                        }));
+                        showNotification(`✅ Classified as ${category}`);
+                        return warnings;
+                      }}
+                      categories={fileCategories[file.id] || []}
+                      onPredictCategory={predictFileCategory}
+                      onStartTranscription={startTranscription}
+                      isTranscribing={isTranscribing && transcriptionTarget?.id === file.id}
+                      transcriptionText={transcriptionTarget?.id === file.id ? transcriptionText : ''}
                     />
                   ))}
                 </div>
@@ -903,12 +1433,24 @@ export default function ProSeLegalDB() {
                               <div className="flex-1">
                                 <div className="font-bold text-slate-950 mb-1 leading-tight">{event.short_title}</div>
                                 <div className="text-sm text-slate-600 leading-relaxed mb-3">{event.description}</div>
-                                {event.description_original && (
+                                {event.description_neutral && (
+                                  <div className="mt-2 p-2 bg-indigo-50 border border-indigo-200 rounded text-xs">
+                                    <div className="font-semibold text-indigo-900 mb-1">Neutral Draft (AI):</div>
+                                    <div className="text-indigo-700">{event.description_neutral}</div>
+                                  </div>
+                                )}
+                                {event.description_original && event.description_original !== event.description && (
                                   <div className="flex items-center gap-1 text-[10px] text-slate-400 mt-2">
                                     <History className="w-3 h-3" /> 
                                     <span className="italic">Original version preserved in history.</span>
                                   </div>
                                 )}
+                                <button
+                                  onClick={() => addNote({ text: '', targetFile: event.short_title || event.event_id, x: 200, y: 200 })}
+                                  className="mt-2 px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs hover:bg-yellow-200 transition flex items-center gap-1"
+                                >
+                                  <StickyNote className="w-3 h-3" /> Add Note
+                                </button>
                               </div>
                               <button onClick={() => handleNeutralize(event.event_id, event.description)} disabled={neutralizingId === event.event_id}
                                 className="shrink-0 flex items-center gap-1.5 text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2.5 py-1.5 rounded-lg border border-indigo-100 hover:bg-indigo-600 hover:text-white transition disabled:opacity-50">
@@ -950,14 +1492,52 @@ export default function ProSeLegalDB() {
 
           {view === 'import' && (
             <div className="max-w-2xl mx-auto space-y-8 pt-12">
-              <div className="text-center mb-12"><Database className="w-12 h-12 text-blue-600 mx-auto mb-4" /><h2 className="text-2xl font-bold">Import System Data</h2><p className="text-slate-500">Import structured CSVs or Master Narrative JSON to populate the timeline.</p></div>
+              <div className="text-center mb-12">
+                <Database className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold">Import System Data</h2>
+                <p className="text-slate-500">Import structured CSVs, paste CSV text, or load the bundled seed.</p>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <DragDropZone onFileSelect={(f) => handleCSVUpload(f[0], 'events')} title="Master Timeline" sub="NORMALIZED_TIMELINE.csv (Quote Aware)" icon={Calendar} accept=".csv" />
                  <DragDropZone onFileSelect={(f) => handleCSVUpload(f[0], 'exhibits')} title="Exhibit Index" sub="EXHIBIT_INDEX.csv" icon={Package} accept=".csv" />
-                 <DragDropZone onFileSelect={(f) => handleMasterNarrativeImport(f[0])} title="Master Narrative" sub="Import case_database JSON" icon={FileJson} accept=".json" />
+                 <div className="border-2 border-dashed rounded-2xl p-4 bg-white space-y-2">
+                   <div className="font-bold text-slate-900">Fallbacks</div>
+                   <div className="text-xs text-slate-600">
+                     <div className="mb-2">
+                       <span className="font-semibold">Paste CSV:</span> If the file picker won't open, paste CSV text here. Expected headers: date,title,description,description_neutral,exhibitRefs,source.
+                     </div>
+                    <textarea
+                      className="w-full border rounded-lg p-2 text-xs font-mono h-24"
+                      value={csvPaste}
+                      onChange={(e) => setCsvPaste(e.target.value)}
+                      placeholder={"date,title,description,description_neutral,exhibitRefs,source\\n2024-11-03,SMS - Paige Wife,Good morning,, ,SMS Backup"}
+                    />
+                     <button
+                       onClick={handlePasteImport}
+                       disabled={isImporting}
+                       className="mt-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-60 w-full"
+                     >
+                       {isImporting ? "Importing..." : "Import from Paste"}
+                     </button>
+                   </div>
+                   <div className="pt-2 border-t border-slate-200 text-xs text-slate-600">
+                     <div className="font-semibold mb-1 text-base">⚡ QUICK LOAD</div>
+                     <p className="mb-2">Click below to instantly load 5 critical events (Gas Incident, PFA Filing, Camper Incident, AppClose blocking).</p>
+                     <button
+                       onClick={handleSeedImport}
+                       disabled={isLoadingSeed}
+                       className="px-4 py-3 rounded-lg bg-emerald-600 text-white text-base font-bold hover:bg-emerald-700 disabled:opacity-60 w-full shadow-lg"
+                     >
+                       {isLoadingSeed ? "⏳ Loading..." : "✅ Load seed timeline (5 events)"}
+                     </button>
+                     <p className="mt-2 text-xs text-slate-500">File: /public/seed_timeline.csv</p>
+                   </div>
+                 </div>
               </div>
             </div>
           )}
+
+
 
            {view === 'exhibits' && (
             <div className="space-y-6">
@@ -968,6 +1548,16 @@ export default function ProSeLegalDB() {
 
         </div>
       </main>
+
+      {/* Render floating sticky notes */}
+      {notes.map((note) => (
+        <SmartSticky
+          key={note.id}
+          {...note}
+          onSave={updateNote}
+          onClose={(id) => deleteNote(id)}
+        />
+      ))}
     </div>
   );
 }

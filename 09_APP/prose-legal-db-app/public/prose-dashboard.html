@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ProSe File Organizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0e0e11;
+      --glass: rgba(255,255,255,0.05);
+      --text: #eee;
+      --accent: #65c7ff;
+      --panel-radius: 14px;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1rem 2rem;
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #444;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: var(--accent);
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 2rem;
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .upload-box {
+      border: 2px dashed #444;
+      padding: 2rem;
+      text-align: center;
+      border-radius: var(--panel-radius);
+      background: var(--glass);
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .upload-box:hover {
+      border-color: var(--accent);
+      background: rgba(255,255,255,0.08);
+    }
+    .upload-box.dragover {
+      border-color: var(--accent);
+      background: rgba(101, 199, 255, 0.1);
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .btn {
+      background: #1f2937;
+      border: 1px solid #4b5563;
+      color: #fff;
+      padding: 0.7rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .btn:hover {
+      background: #374151;
+    }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0e0e11;
+    }
+    .btn-primary:hover {
+      background: #4db8ff;
+    }
+    .file-list, .timeline {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border-radius: var(--panel-radius);
+      padding: 1.5rem;
+      border: 1px solid #333;
+    }
+    .file-list h2, .timeline h2 {
+      margin-top: 0;
+      color: var(--accent);
+      font-size: 1.2rem;
+    }
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+      padding: 0.8rem 0;
+    }
+    .file-item:last-child {
+      border-bottom: none;
+    }
+    .timeline-entry {
+      border-left: 4px solid var(--accent);
+      margin-left: 1rem;
+      padding-left: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+    }
+    .timeline-entry:last-child {
+      margin-bottom: 0;
+    }
+    .timeline-entry strong {
+      color: var(--accent);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+    .import-section {
+      background: var(--glass);
+      border-radius: var(--panel-radius);
+      padding: 1.5rem;
+      border: 1px solid #333;
+      margin-top: 1rem;
+    }
+    .import-section h3 {
+      color: var(--accent);
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📂 ProSe File Organizer</h1>
+</header>
+
+<div class="container">
+
+  <div class="upload-box" id="uploadBox" onclick="triggerUpload()">
+    <p>Drag & drop files or click to upload</p>
+    <input type="file" id="fileInput" multiple />
+    <button class="btn btn-primary">Select Files</button>
+  </div>
+
+  <div class="import-section">
+    <h3>📥 Import Timeline Data</h3>
+    <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 1rem;">Load your master timeline CSV or seed data</p>
+    <button class="btn" onclick="loadSeedTimeline()">Load Seed Timeline (5 events)</button>
+    <button class="btn" onclick="triggerCSVImport()" style="margin-left: 0.5rem;">Import CSV File</button>
+    <input type="file" id="csvInput" accept=".csv" style="display: none;" />
+  </div>
+
+  <div class="file-list" id="fileList">
+    <h2>📁 Uploaded Files</h2>
+    <div id="filesContainer">
+      <div class="empty-state">No files uploaded yet</div>
+    </div>
+  </div>
+
+  <div class="timeline" id="timeline">
+    <h2>🕒 Timeline View</h2>
+    <div id="timelineEntries">
+      <div class="empty-state">No timeline entries yet. Import CSV or load seed data.</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  ProSe Agent Dashboard · Built with ❤️ for legal clarity
+</footer>
+
+<script>
+  const fileInput = document.getElementById('fileInput');
+  const csvInput = document.getElementById('csvInput');
+  const filesContainer = document.getElementById('filesContainer');
+  const timelineEntries = document.getElementById('timelineEntries');
+  const uploadBox = document.getElementById('uploadBox');
+  
+  let uploadedFiles = [];
+  let timelineData = [];
+
+  // Drag & Drop handlers
+  uploadBox.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadBox.classList.add('dragover');
+  });
+
+  uploadBox.addEventListener('dragleave', () => {
+    uploadBox.classList.remove('dragover');
+  });
+
+  uploadBox.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadBox.classList.remove('dragover');
+    const files = [...e.dataTransfer.files];
+    handleFiles(files);
+  });
+
+  function triggerUpload() {
+    fileInput.click();
+  }
+
+  function triggerCSVImport() {
+    csvInput.click();
+  }
+
+  fileInput.addEventListener('change', (e) => {
+    handleFiles([...e.target.files]);
+  });
+
+  csvInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file && file.name.endsWith('.csv')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        parseCSV(event.target.result);
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  function handleFiles(files) {
+    files.forEach(file => {
+      uploadedFiles.push({
+        name: file.name,
+        size: formatFileSize(file.size),
+        date: new Date(file.lastModified)
+      });
+      
+      const item = document.createElement('div');
+      item.className = 'file-item';
+      item.innerHTML = `
+        <span>📄 ${file.name}</span>
+        <span>${formatFileSize(file.size)} · ${file.lastModified ? new Date(file.lastModified).toLocaleDateString() : 'Today'}</span>
+      `;
+      
+      if (filesContainer.querySelector('.empty-state')) {
+        filesContainer.innerHTML = '';
+      }
+      filesContainer.appendChild(item);
+    });
+  }
+
+  function parseCSV(text) {
+    const lines = text.split('\n').filter(line => line.trim());
+    if (lines.length < 2) {
+      alert('CSV appears empty or invalid');
+      return;
+    }
+    
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const dateIdx = headers.indexOf('date');
+    const titleIdx = headers.indexOf('title');
+    const descIdx = headers.indexOf('description');
+    
+    timelineData = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim());
+      if (cols.length < 2) continue;
+      
+      timelineData.push({
+        date: dateIdx >= 0 ? cols[dateIdx] : '',
+        title: titleIdx >= 0 ? cols[titleIdx] : cols[0] || 'Untitled',
+        description: descIdx >= 0 ? cols[descIdx] : ''
+      });
+    }
+    
+    renderTimeline();
+    alert(`Imported ${timelineData.length} timeline entries`);
+  }
+
+  function renderTimeline() {
+    timelineEntries.innerHTML = '';
+    
+    if (timelineData.length === 0) {
+      timelineEntries.innerHTML = '<div class="empty-state">No timeline entries yet</div>';
+      return;
+    }
+    
+    timelineData.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    timelineData.forEach(entry => {
+      const div = document.createElement('div');
+      div.className = 'timeline-entry';
+      div.innerHTML = `
+        <strong>${entry.date || 'No date'} · ${entry.title}</strong>
+        ${entry.description ? '<br>' + entry.description.substring(0, 100) + (entry.description.length > 100 ? '...' : '') : ''}
+      `;
+      timelineEntries.appendChild(div);
+    });
+  }
+
+  async function loadSeedTimeline() {
+    try {
+      const res = await fetch('/seed_timeline.csv');
+      if (!res.ok) {
+        alert('Seed file not found. Make sure seed_timeline.csv is in the public folder.');
+        return;
+      }
+      const text = await res.text();
+      parseCSV(text);
+    } catch (err) {
+      alert('Failed to load seed timeline: ' + err.message);
+    }
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+</script>
+
+</body>
+</html>
+
