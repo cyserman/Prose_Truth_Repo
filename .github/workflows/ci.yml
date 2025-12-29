@@ -23,6 +23,15 @@ jobs:
         run: |
           shellcheck restore_christine.sh || exit 1
           echo "✅ Shellcheck passed"
+      
+      - name: Upload shellcheck report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shellcheck-report
+          path: |
+            shellcheck-*.txt
+          retention-days: 7
 
   test-shell:
     name: Shell Script Tests (Bats)
@@ -38,9 +47,66 @@ jobs:
       
       - name: Run Bats tests
         run: |
-          bats tests/restore_christine.bats
-          bats tests/integration.bats
+          bats tests/restore_christine.bats || exit 1
+          bats tests/integration.bats || exit 1
           echo "✅ All Bats tests passed"
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bats-test-results
+          path: |
+            test-results-*.xml
+          retention-days: 7
+
+  scan-secrets:
+    name: Secrets Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for detect-secrets
+      
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install detect-secrets
+        run: |
+          pip install detect-secrets
+      
+      - name: Run detect-secrets scan
+        id: scan
+        run: |
+          if [ -f .secrets.baseline ]; then
+            detect-secrets scan --baseline .secrets.baseline --force-use-all-plugins > scan-results.txt 2>&1 || true
+            if grep -q "Potential secrets" scan-results.txt || grep -q "new secrets" scan-results.txt; then
+              echo "⚠️ Secrets found — blocking merge"
+              cat scan-results.txt
+              echo "::error::Secrets detected in code. Review and rotate immediately."
+              exit 1
+            else
+              echo "✅ No new secrets detected"
+            fi
+          else
+            echo "⚠️ No .secrets.baseline found. Creating initial baseline..."
+            detect-secrets scan --force-use-all-plugins > .secrets.baseline || true
+            echo "::warning::Initial secrets baseline created. Review and commit."
+          fi
+      
+      - name: Upload secrets scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: secrets-scan-results
+          path: |
+            scan-results.txt
+            .secrets.baseline
+          retention-days: 7
+          if-no-files-found: ignore
 
   lint-js:
     name: JavaScript Linting
@@ -85,4 +151,12 @@ jobs:
       - name: Build
         working-directory: 09_APP/prose-legal-db-app
         run: npm run build
+      
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: 09_APP/prose-legal-db-app/dist
+          retention-days: 7
 

@@ -1,0 +1,135 @@
+name: Restore Christine (Workflow Dispatch)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      dry_run:
+        description: 'Run in dry-run mode (no changes)'
+        required: true
+        default: 'true'
+        type: boolean
+      backup_dir:
+        description: 'Backup directory path (optional)'
+        required: false
+        type: string
+      skip_confirmations:
+        description: 'Skip confirmation prompts (use --yes flag)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  restore-christine:
+    name: Restore Christine (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    
+    # Require approval for production runs
+    environment:
+      name: ${{ inputs.environment }}
+      url: https://github.com/${{ github.repository }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 09_APP/prose-legal-db-app/package-lock.json
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y curl git build-essential shellcheck bats
+      
+      - name: Run shellcheck on restore_christine.sh
+        run: |
+          shellcheck -x restore_christine.sh || echo "⚠️ shellcheck warnings (non-blocking)"
+      
+      - name: Run BATS tests
+        run: |
+          if [ -f "tests/restore_christine.bats" ]; then
+            bats tests/restore_christine.bats
+          else
+            echo "⚠️ BATS tests not found, skipping"
+          fi
+      
+      - name: Create backup directory (if specified)
+        if: inputs.backup_dir != ''
+        run: |
+          mkdir -p "${{ inputs.backup_dir }}"
+          echo "Backup directory: ${{ inputs.backup_dir }}"
+      
+      - name: Dry-run mode (preview)
+        if: inputs.dry_run == 'true'
+        run: |
+          echo "🔍 DRY RUN MODE: Previewing operations..."
+          chmod +x restore_christine.sh
+          ./restore_christine.sh --dry-run
+      
+      - name: Actual restore (production)
+        if: inputs.dry_run == 'false' && inputs.environment == 'production'
+        run: |
+          echo "🚀 PRODUCTION MODE: Executing restore..."
+          chmod +x restore_christine.sh
+          
+          if [ "${{ inputs.skip_confirmations }}" == "true" ]; then
+            ./restore_christine.sh --yes
+          else
+            echo "⚠️ Skipping actual restore in CI (requires manual confirmation)"
+            echo "To run in production, execute manually with proper approvals"
+            exit 1
+          fi
+      
+      - name: Actual restore (staging)
+        if: inputs.dry_run == 'false' && inputs.environment == 'staging'
+        run: |
+          echo "🚀 STAGING MODE: Executing restore..."
+          chmod +x restore_christine.sh
+          
+          if [ "${{ inputs.skip_confirmations }}" == "true" ]; then
+            ./restore_christine.sh --yes
+          else
+            ./restore_christine.sh
+          fi
+      
+      - name: Verify installation
+        if: inputs.dry_run == 'false'
+        run: |
+          echo "✅ Verifying installation..."
+          node -v
+          npm -v
+          cd 09_APP/prose-legal-db-app && npm list --depth=0 || true
+      
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: restore-christine-logs-${{ inputs.environment }}-${{ github.run_number }}
+          path: |
+            restore-*.log
+            .copilot-tracking/research/*.txt
+          if-no-files-found: ignore
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Restore Christine Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry Run:** ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backup Dir:** ${{ inputs.backup_dir || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
