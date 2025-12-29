@@ -1,0 +1,42 @@
+{
+  "agents": [
+    {
+      "name": "Repo Agent",
+      "path": "09_APP/agents/repo_agent.py",
+      "auto": true,
+      "trigger": "new_file",
+      "description": "Guided file intake with classification and routing"
+    },
+    {
+      "name": "OCR Processor",
+      "path": "09_APP/ocr_processor/standalone_ocr.py",
+      "auto": false,
+      "trigger": "manual",
+      "description": "Extract text from PDFs and images"
+    },
+    {
+      "name": "Communication Parser",
+      "path": "09_APP/process_communication_data.sh",
+      "auto": false,
+      "trigger": "manual",
+      "description": "Parse communication logs and messages"
+    },
+    {
+      "name": "Master DB Builder",
+      "path": "09_APP/master_case_db_builder.py",
+      "auto": false,
+      "trigger": "new_csv",
+      "description": "Merge CSV files into Master_CaseDB.csv",
+      "note": "This file may not exist yet - placeholder for future implementation"
+    }
+  ],
+  "watch_directories": [
+    "09_APP/Generated",
+    "06_SCANS/INBOX"
+  ],
+  "output_directories": [
+    "09_APP/Database",
+    "03_EXHIBITS"
+  ]
+}
+

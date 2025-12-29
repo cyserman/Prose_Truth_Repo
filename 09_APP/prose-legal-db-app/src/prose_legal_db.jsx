@@ -37,6 +37,8 @@ import {
 } from 'lucide-react';
 import SmartSticky from './components/SmartSticky';
 import { useStickyNotes } from './lib/useStickyNotes';
+import SwimlaneTimeline from './components/SwimlaneTimeline';
+import FloatingNoteConsole from './components/FloatingNoteConsole';
 
 // --- Constants & Types ---
 const LS_KEY = "PROSE_LEGAL_DB_V3";
@@ -1378,7 +1380,9 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
           <button onClick={() => setView('timeline')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'timeline' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
             <Calendar className="w-4 h-4" /> Timeline
           </button>
-          
+          <button onClick={() => setView('swimlane')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'swimlane' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
+            <History className="w-4 h-4" /> Swimlane View
+          </button>
           <button onClick={() => setView('organizer')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'organizer' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
             <ScanLine className="w-4 h-4" /> Evidence Organizer
             <span className="ml-auto bg-slate-800/50 text-[10px] px-1.5 py-0.5 rounded-full border border-white/10">{files.length}</span>
@@ -1388,12 +1392,12 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
             <Package className="w-4 h-4" /> Exhibit Index
           </button>
           
-          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest">✨ Gemini Analysis</div>
-          <button onClick={runStrategicAnalysis} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'strategy' ? 'btn-ember text-white font-bold' : 'text-indigo-300 hover:bg-indigo-950/30 hover:text-indigo-200'}`}>
+          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest text-center">✨ Gemini Analysis</div>
+          <button onClick={runStrategicAnalysis} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'strategy' ? 'btn-ember text-white font-bold' : 'text-blue-300 hover:bg-blue-950/30 hover:text-blue-200'}`}>
             <BrainCircuit className="w-4 h-4" /> Strategic Analyzer
           </button>
 
-          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest">Utilities</div>
+          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest text-center">Utilities</div>
           <button onClick={() => setView('import')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-sm ${view === 'import' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
             <Upload className="w-4 h-4" /> Import CSV
           </button>
@@ -1407,7 +1411,7 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
             <Printer className="w-4 h-4" /> Export PDF
           </button>
           
-          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest">Theme</div>
+          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-orange-400/50 uppercase tracking-widest text-center">Theme</div>
           <div className="px-4 space-y-1">
             <button onClick={() => setTheme('light')} className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm ${theme === 'light' ? 'btn-ember text-white font-bold' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
               ☀️ Light
@@ -1436,7 +1440,7 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
         <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center shrink-0">
           <div>
             <h2 className="text-xl font-bold capitalize flex items-center gap-2">
-              {view === 'strategy' && <Sparkles className="w-5 h-5 text-indigo-500" />}
+              {view === 'strategy' && <Sparkles className="w-5 h-5 text-blue-500" />}
               {view === 'organizer' && <ScanLine className="w-5 h-5 text-blue-500" />}
               {view.replace('_', ' ')}
             </h2>
@@ -1636,9 +1640,9 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
               <div className="bg-slate-900 text-white p-8 rounded-2xl shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-10"><BrainCircuit className="w-32 h-32" /></div>
                 <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-4"><Sparkles className="w-6 h-6 text-indigo-400" /><h3 className="text-2xl font-bold tracking-tight">✨ Strategic Analyzer Output</h3></div>
+                  <div className="flex items-center gap-3 mb-4"><Sparkles className="w-6 h-6 text-blue-400" /><h3 className="text-2xl font-bold tracking-tight">✨ Strategic Analyzer Output</h3></div>
                   {isAnalyzing ? (
-                    <div className="flex flex-col items-center justify-center py-12 gap-4"><Loader2 className="w-10 h-10 text-indigo-400 animate-spin" /><p className="text-slate-400 font-medium animate-pulse">Consulting the framework and scanning timeline for patterns...</p></div>
+                    <div className="flex flex-col items-center justify-center py-12 gap-4"><Loader2 className="w-10 h-10 text-blue-400 animate-spin" /><p className="text-slate-400 font-medium animate-pulse">Consulting the framework and scanning timeline for patterns...</p></div>
                   ) : (
                     <div className="prose prose-invert max-w-none"><div className="whitespace-pre-wrap text-slate-300 leading-relaxed font-serif text-lg">{analysisResult || "Load your timeline and click Analyze to generate strategic insights based on the master prompt."}</div></div>
                   )}
