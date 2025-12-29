@@ -30,16 +30,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented secrets rotation policy
 - Enhanced script safety with preflight checks
 
-## [1.0.0] - 2024-12-28
+## [1.0.0-alpha] - 2024-12-28
 
 ### Added
-- Initial release
+- Initial alpha release
 - Core timeline management
 - Evidence organizer
 - AI-powered language neutralization
 - Strategic analyzer
 - CSV import/export
 - Print-ready PDF export
+- Reflexive Intake Agent
+- Swimlane Timeline View
+- Floating Note Console
+- Motion Builder
+- Deadline Tracker
+- Contradiction Detector
+- Comprehensive CI/CD pipeline
+- Complete documentation suite
 
-[Unreleased]: https://github.com/cyserman/Prose_Truth_Repo/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/cyserman/Prose_Truth_Repo/releases/tag/v1.0.0
+[Unreleased]: https://github.com/cyserman/Prose_Truth_Repo/compare/v1.0.0-alpha...HEAD
+[1.0.0-alpha]: https://github.com/cyserman/Prose_Truth_Repo/releases/tag/v1.0.0-alpha
