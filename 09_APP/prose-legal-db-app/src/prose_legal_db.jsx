@@ -41,6 +41,7 @@ import SmartSticky from './components/SmartSticky';
 import { useStickyNotes } from './lib/useStickyNotes';
 import SwimlaneTimeline from './components/SwimlaneTimeline';
 import FloatingNoteConsole from './components/FloatingNoteConsole';
+import FloatingEvidenceConsole from './components/FloatingEvidenceConsole';
 import MotionBuilder from './components/MotionBuilder';
 import DeadlineTracker from './components/DeadlineTracker';
 import ContradictionDetector from './components/ContradictionDetector';
@@ -1779,6 +1780,14 @@ Respond with ONLY the category name(s) separated by commas. If multiple apply, l
         onNewNote={(noteEntry) => {
           console.log('New note from console:', noteEntry);
           showNotification('📝 Note saved and queued for timeline merge');
+        }}
+      />
+
+      {/* Render Floating Evidence Console - file drop + AI normalization */}
+      <FloatingEvidenceConsole
+        onSubmit={(entry) => {
+          console.log('New evidence entry:', entry);
+          showNotification('📦 Evidence entry saved and queued for timeline merge');
         }}
       />
     </div>

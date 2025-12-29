@@ -17,7 +17,10 @@ DRY_RUN=false
 AUTO_YES=false
 BACKUP_DIR=""
 LOG_FILE=""
-REPO_ROOT="/home/ezcyser/⏰ Projects🕰️/🪤 PROSE_TRUTH_REPO"
+
+# Auto-detect repo root (script location)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$SCRIPT_DIR}"
 APP_PATH="$REPO_ROOT/09_APP/prose-legal-db-app"
 
 # Initialize backup and log directories
