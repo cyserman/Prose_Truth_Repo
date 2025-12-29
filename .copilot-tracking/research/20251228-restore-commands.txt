@@ -1,0 +1,11 @@
+9:#   --yes        Skip confirmation prompts (use with caution)
+45:  --yes        Skip confirmation prompts (use with caution)
+56:  ./restore_christine.sh               # Run with confirmations
+64:            echo "Use --help for usage information"
+89:confirm() {
+92:        echo "✓ Auto-confirmed: $prompt"
+114:if ! confirm "Proceed with system package updates?"; then
+119:run_cmd "sudo apt-get install -y curl git build-essential" || exit_with_pause "Failed to install dependencies."
+124:    if ! confirm "Install Node.js 20 LTS?"; then
+127:    run_cmd "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -" || exit_with_pause "Failed to source Node."
+139:if ! confirm "Proceed with npm install and dev server launch?"; then
