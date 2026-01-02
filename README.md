@@ -65,12 +65,16 @@ python 09_APP/agents/orchestrator.py
 07_LEGAL_RESEARCH/ - Case law and statutes
 08_TASKS_AND_LOGS/ - Task tracking and operation logs
 09_APP/         - React application tooling
+  ├── prose-legal-db-app/    - Main React application
+  ├── CaseTimeline/          - Mobile timeline app (integration pending)
+  └── chromebook-toolbox/    - Development toolbox (integration pending)
 ```
 
 ## 📚 DOCUMENTATION
 
 - **[USER_GUIDE.md](./USER_GUIDE.md)** - Complete user instruction manual with step-by-step guides
 - **[FEATURES.md](./FEATURES.md)** - Comprehensive feature list and capabilities
+- **[INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)** - Integration instructions for CaseTimeline Mobile, Chromebook Toolbox v2, and CSV Timeline Data
 - **[README.md](./README.md)** - This file (technical setup and overview)
 
 ## CORE FEATURES
