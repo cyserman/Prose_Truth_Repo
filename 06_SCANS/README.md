@@ -11,6 +11,7 @@ INBOX/          - Active intake area
   new/          - Fresh scans (ignored by git)
   Salvaged/     - Recovered data from previous systems
   to_trash/     - Archive pending deletion (ignored by git)
+  transfers/    - File sharing without SSH (tracked by git)
 
 OCR_PENDING/    - Documents queued for OCR processing
 OCR_COMPLETE/   - Processed documents with text extraction
@@ -40,6 +41,12 @@ The following are **not** tracked:
 - `INBOX/new/` - Fresh scans may contain sensitive data
 - `INBOX/to_trash/` - Archived content
 - Any embedded `.git/` repos in trash
+
+The following **are** tracked:
+- `INBOX/transfers/` - For sharing files when SSH is not available
+- `INBOX/Salvaged/` - Recovered data from previous systems
+
+**Important:** Use `transfers/` directory only for files that need to be accessible remotely via git when SSH is not set up. Do NOT place sensitive documents here.
 
 ## SECURITY
 
