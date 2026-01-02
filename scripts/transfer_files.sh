@@ -69,11 +69,14 @@ upload_file() {
     echo "Copying $file to transfers directory..."
     cp "$file" "$dest"
     
+    # Sanitize filename for use in commit message
+    local safe_basename=$(echo "$basename" | tr -d '\n\r' | sed 's/[^a-zA-Z0-9._-]/_/g')
+    
     echo "Adding to git..."
     git -C "$REPO_ROOT" add "$dest"
     
     echo "Committing..."
-    git -C "$REPO_ROOT" commit -m "Transfer: Upload $basename"
+    git -C "$REPO_ROOT" commit -m "Transfer: Upload ${safe_basename}"
     
     echo "Pushing to remote..."
     git -C "$REPO_ROOT" push
@@ -122,10 +125,11 @@ list_files() {
             if [ -f "$file" ] && [ "$(basename "$file")" != ".gitkeep" ] && [ "$(basename "$file")" != "README.md" ]; then
                 local basename=$(basename "$file")
                 local size=$(du -h "$file" | cut -f1)
-                local date=$(stat -c '%y' "$file" 2>/dev/null || stat -f '%Sm' "$file" 2>/dev/null || echo "unknown")
+                # Use ls -l for cross-platform compatibility
+                local date=$(ls -l "$file" | awk '{print $6, $7, $8}')
                 echo "  $basename"
                 echo "    Size: $size"
-                echo "    Modified: ${date:0:19}"
+                echo "    Modified: $date"
                 echo ""
                 ((count++))
             fi
