@@ -65,9 +65,10 @@ To export updated timeline data:
 
 ## Data Mapping
 
-The CSV import maps to the following app structures:
+The CSV import maps columns to the following app data structure:
 
 ```javascript
+// Example mapping used during CSV import in the CaseTimeline app
 {
   id: event_id,
   date: new Date(date),

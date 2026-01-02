@@ -56,18 +56,18 @@ python 09_APP/agents/orchestrator.py
 ## DIRECTORY STRUCTURE
 
 ```
-00_ANCHORS/     - Constitutional documents and strategic anchors
-02_TIMELINES/   - CSV timeline data (evidence spine)
-03_EXHIBITS/    - Finalized evidence files (categorized)
-04_COMMUNICATIONS/ - Call logs, SMS, app blocks
-05_COURT_FILINGS/  - Drafts, filed documents, orders
-06_SCANS/       - Input funnel for raw documents
-07_LEGAL_RESEARCH/ - Case law and statutes
-08_TASKS_AND_LOGS/ - Task tracking and operation logs
-09_APP/         - React application tooling
-  ├── prose-legal-db-app/    - Main React application
-  ├── CaseTimeline/          - Mobile timeline app (integration pending)
-  └── chromebook-toolbox/    - Development toolbox (integration pending)
+00_ANCHORS/            - Constitutional documents and strategic anchors
+02_TIMELINES/          - CSV timeline data (evidence spine)
+03_EXHIBITS/           - Finalized evidence files (categorized)
+04_COMMUNICATIONS/     - Call logs, SMS, app blocks
+05_COURT_FILINGS/      - Drafts, filed documents, orders
+06_SCANS/              - Input funnel for raw documents
+07_LEGAL_RESEARCH/     - Case law and statutes
+08_TASKS_AND_LOGS/     - Task tracking and operation logs
+09_APP/                - React application tooling
+  ├── prose-legal-db-app/  - Main React application
+  ├── CaseTimeline/        - Mobile timeline app (integration pending)
+  └── chromebook-toolbox/  - Development toolbox (integration pending)
 ```
 
 ## 📚 DOCUMENTATION
