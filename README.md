@@ -203,11 +203,37 @@ When working with this repository:
 
 ## WORKFLOW
 
-1. **Ingest:** Drop raw files in `06_SCANS/INBOX/`
+1. **Ingest:** Drop raw files in `06_SCANS/INBOX/new/` (or use `INBOX/transfers/` for remote access without SSH)
 2. **Process:** Use OCR tools or React app to tag and index
 3. **Timeline:** Add events to timeline CSVs with exhibit links
 4. **Archive:** Move processed files to `03_EXHIBITS/`
 5. **Generate:** Create court-ready summaries and motions
+
+### File Transfer Without SSH
+
+If SSH is not available, use `06_SCANS/INBOX/transfers/` to share files via git:
+
+**Quick Start:**
+```bash
+# Upload a file
+./scripts/transfer_files.sh upload myfile.zip
+
+# Download files
+./scripts/transfer_files.sh download
+
+# List available files
+./scripts/transfer_files.sh list
+
+# Clean up after transfer
+./scripts/transfer_files.sh cleanup
+```
+
+**Manual Method:**
+- Place files in `transfers/` directory
+- Commit and push to repository: `git add 06_SCANS/INBOX/transfers/ && git commit -m "Transfer files" && git push`
+- Files will be accessible remotely via `git pull`
+
+**Important:** See `06_SCANS/INBOX/transfers/README.md` for security guidelines and best practices.
 
 ## LICENSE
 

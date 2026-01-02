@@ -73,6 +73,23 @@ ls -lh a11y-reports/
 
 ## 🔧 **Common Commands**
 
+### File Transfer Without SSH
+```bash
+# Upload a file (for non-sensitive files only!)
+./scripts/transfer_files.sh upload myfile.zip
+
+# Download files from remote
+./scripts/transfer_files.sh download
+
+# List available files
+./scripts/transfer_files.sh list
+
+# Clean up after transfer
+./scripts/transfer_files.sh cleanup
+```
+
+⚠️ **WARNING:** Files in `06_SCANS/INBOX/transfers/` are tracked by git. Do NOT place sensitive documents there!
+
 ### Run Secrets Scan
 ```bash
 ./scripts/scan-secrets.sh

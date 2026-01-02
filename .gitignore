@@ -47,8 +47,11 @@ coverage/
 *.p12
 secrets/
 
-# Scans directory (temporary downloads)
-06_SCANS/INBOX/
+# Scans directory (temporary downloads - keep structure, ignore sensitive content)
+06_SCANS/INBOX/new/
+06_SCANS/INBOX/to_trash/
+# Allow transfers directory for file sharing without SSH
+!06_SCANS/INBOX/transfers/
 
 # Database files (local only)
 09_APP/Database/*.db
