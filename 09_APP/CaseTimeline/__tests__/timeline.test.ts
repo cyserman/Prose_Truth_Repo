@@ -4,6 +4,8 @@ import {
   generateId,
   DEFAULT_EVENT_TYPES,
   DEFAULT_LANES,
+  EventClass,
+  EventStatus,
 } from "@/types/timeline";
 import { getTimelineDataSummary } from "@/lib/export-import";
 import type { TimelineState } from "@/types/timeline";
@@ -97,6 +99,8 @@ describe("Export/Import Utilities", () => {
         typeId: "filing",
         note: "Test event",
         attachments: [],
+        class: EventClass.COURT_LEGAL,
+        status: EventStatus.ASSERTED,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -107,6 +111,8 @@ describe("Export/Import Utilities", () => {
         laneId: "para",
         monthIndex: 5,
         typeId: "court",
+        class: EventClass.COURT_LEGAL,
+        status: EventStatus.ASSERTED,
         note: "Another event",
         attachments: [],
         createdAt: new Date().toISOString(),

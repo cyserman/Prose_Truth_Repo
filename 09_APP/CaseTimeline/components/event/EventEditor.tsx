@@ -11,7 +11,7 @@ import {
 import * as Haptics from "expo-haptics";
 import * as DocumentPicker from "expo-document-picker";
 import { useState, useEffect } from "react";
-import { Event, Attachment, VoiceNote, generateId } from "@/types/timeline";
+import { Event, Attachment, VoiceNote, EventClass, EventStatus, generateId } from "@/types/timeline";
 import { useTimeline } from "@/lib/timeline-context";
 import { Picker } from "@react-native-picker/picker";
 import { VoiceRecorder } from "./VoiceRecorder";
@@ -65,6 +65,8 @@ export function EventEditor({
       note,
       attachments,
       voiceNote,
+      class: existingEvent?.class || EventClass.ADMINISTRATIVE,
+      status: existingEvent?.status || EventStatus.ASSERTED,
       createdAt: existingEvent?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
