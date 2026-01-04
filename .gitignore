@@ -62,3 +62,4 @@ secrets/
 
 # Secrets baseline (committed, but track changes)
 # .secrets.baseline
+*.zip

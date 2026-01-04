@@ -1,77 +1,133 @@
-import { useState, useEffect } from 'react'
-import { ShieldCheck, Database, Loader2 } from 'lucide-react'
-import { db } from './lib/db'
+/**
+ * Main App Component
+ * 
+ * Truth Repo - Pro Se Legal DB
+ * 
+ * Architecture:
+ * - Data Layer: lib/db.js (Dexie schema)
+ * - Domain Logic: lib/spine/*, lib/importers/*
+ * - Presentation: components/*
+ * - Optional AI: lib/neutralize.js
+ */
+
+import { useState } from 'react';
+import { ShieldCheck, Database, FileText, Calendar, Upload, Download } from 'lucide-react';
+import { useCaseStore } from './state/useCaseStore';
+import { SpineView } from './components/SpineView';
+import { TimelineView } from './components/TimelineView';
+import { IntakeQueue } from './components/IntakeQueue';
+import { ExportPanel } from './components/ExportPanel';
+import { ANCHOR_RULES, TRUTH_REPO_PRINCIPLES } from './constants/anchors';
 
 function App() {
-  const [dbReady, setDbReady] = useState(false)
-  const [narrativeLoaded, setNarrativeLoaded] = useState(false)
-
-  useEffect(() => {
-    // Initialize database
-    db.open().then(() => {
-      setDbReady(true)
-    }).catch(err => {
-      console.error('Database initialization error:', err)
-    })
-  }, [])
-
-  const handleLoadMasterNarrative = async () => {
-    // Placeholder for narrative loading logic
-    setNarrativeLoaded(true)
-    console.log('Master Narrative loading logic will be implemented in Phase 2')
+  const { dbReady, stats, refreshStats } = useCaseStore();
+  const [activeView, setActiveView] = useState('intake');
+  
+  const views = [
+    { id: 'intake', label: 'Intake Queue', icon: Upload },
+    { id: 'spine', label: 'Comm Spine', icon: FileText },
+    { id: 'timeline', label: 'Timeline', icon: Calendar },
+    { id: 'export', label: 'Export', icon: Download },
+  ];
+  
+  if (!dbReady) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <Database className="w-12 h-12 text-gray-400 mx-auto mb-4 animate-spin" />
+          <div className="text-gray-600">Initializing database...</div>
+        </div>
+      </div>
+    );
   }
-
+  
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="captain-header captain-mode">
-        <div className="container mx-auto flex items-center gap-3">
-          <ShieldCheck className="w-6 h-6 text-green-400" />
-          <h1 className="text-xl">Pro Se Legal DB - The Truth Repo</h1>
-          <span className="ml-auto text-sm text-slate-400">v2.0.0</span>
+      {/* Header */}
+      <header className="bg-white border-b shadow-sm">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="w-6 h-6 text-green-500" />
+              <div>
+                <h1 className="text-xl font-semibold">Pro Se Legal DB</h1>
+                <p className="text-sm text-gray-600">The Truth Repo</p>
+              </div>
+            </div>
+            
+            {/* Stats */}
+            <div className="flex gap-4 text-sm">
+              <div className="text-center">
+                <div className="font-semibold">{stats.scans}</div>
+                <div className="text-gray-500">Scans</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold">{stats.comms}</div>
+                <div className="text-gray-500">Comms</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold">{stats.events}</div>
+                <div className="text-gray-500">Events</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold">{stats.exhibits}</div>
+                <div className="text-gray-500">Exhibits</div>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
-
-      <main className="container mx-auto px-6 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <Database className="w-8 h-8 text-slate-600" />
-            <div>
-              <h2 className="text-2xl font-bold text-slate-800">System Status</h2>
-              <p className="text-slate-600">Montgomery County, PA - Firey v. Firey</p>
-            </div>
+      
+      {/* Navigation */}
+      <nav className="bg-white border-b">
+        <div className="container mx-auto px-6">
+          <div className="flex gap-1">
+            {views.map(view => {
+              const Icon = view.icon;
+              return (
+                <button
+                  key={view.id}
+                  onClick={() => {
+                    setActiveView(view.id);
+                    refreshStats();
+                  }}
+                  className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
+                    activeView === view.id
+                      ? 'border-blue-500 text-blue-600 font-medium'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {view.label}
+                </button>
+              );
+            })}
           </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              {dbReady ? (
-                <>
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-slate-700">Database: Connected (Version 2)</span>
-                </>
-              ) : (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
-                  <span className="text-slate-700">Database: Initializing...</span>
-                </>
-              )}
-            </div>
-
-            <div className="pt-4 border-t border-slate-200">
-              <button
-                onClick={handleLoadMasterNarrative}
-                disabled={!dbReady || narrativeLoaded}
-                className="px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <ShieldCheck className="w-5 h-5" />
-                {narrativeLoaded ? 'Master Narrative Loaded' : 'Load Master Narrative'}
-              </button>
+        </div>
+      </nav>
+      
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-8">
+        {activeView === 'intake' && <IntakeQueue />}
+        {activeView === 'spine' && <SpineView />}
+        {activeView === 'timeline' && <TimelineView />}
+        {activeView === 'export' && <ExportPanel />}
+      </main>
+      
+      {/* Footer with Anchor Reminders */}
+      <footer className="bg-gray-100 border-t mt-12">
+        <div className="container mx-auto px-6 py-4">
+          <div className="text-xs text-gray-600 space-y-1">
+            <div className="font-semibold mb-2">Truth Repo Principles:</div>
+            <div>{TRUTH_REPO_PRINCIPLES.PURPOSE}</div>
+            <div className="mt-2">
+              <strong>Key Rule:</strong> {ANCHOR_RULES.NEVER_OVERWRITE_ORIGINALS}
             </div>
           </div>
         </div>
-      </main>
+      </footer>
     </div>
-  )
+  );
 }
 
-export default App
-
+export default App;
