@@ -9,10 +9,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, searchSpineItems, getSpineItemsByDateRange, getSpineItemsByCounterpart } from '@/lib/spine-db';
-import { SpineItem, MessageCategory } from '@/types/spine';
+import { db, searchSpineItems, getSpineItemsByDateRange, getSpineItemsByCounterpart, getStickyNotesForTarget } from '@/lib/spine-db';
+import { SpineItem, MessageCategory, StickyNote } from '@/types/spine';
 import { useColors } from '@/hooks/use-colors';
 import { format } from 'date-fns';
+import { StickyNoteEditor } from '../sticky-notes/StickyNoteEditor';
+import { StickyNoteDisplay } from '../sticky-notes/StickyNoteDisplay';
 
 interface SpineViewerProps {
   onSelectItems?: (items: SpineItem[]) => void;
@@ -28,9 +30,33 @@ export function SpineViewer({ onSelectItems, selectionMode = false }: SpineViewe
   const [dateRangeStart, setDateRangeStart] = useState<string | null>(null);
   const [dateRangeEnd, setDateRangeEnd] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Sticky note state
+  const [showNoteEditor, setShowNoteEditor] = useState(false);
+  const [noteTargetId, setNoteTargetId] = useState<string | null>(null);
+  const [editingNote, setEditingNote] = useState<StickyNote | undefined>(undefined);
 
   // Get all spine items (will be filtered)
   const allItems = useLiveQuery(() => db.spine.orderBy('timestamp').toArray(), []);
+  
+  // Get all sticky notes for spine items
+  const allStickyNotes = useLiveQuery(() => 
+    db.stickyNotes.where('target_type').equals('spine').toArray(), 
+    []
+  );
+  
+  // Create a map of spine item IDs to their sticky notes
+  const stickyNotesMap = React.useMemo(() => {
+    const map = new Map<string, StickyNote[]>();
+    if (allStickyNotes) {
+      for (const note of allStickyNotes) {
+        const notes = map.get(note.target_id) || [];
+        notes.push(note);
+        map.set(note.target_id, notes);
+      }
+    }
+    return map;
+  }, [allStickyNotes]);
 
   // Filter spine items based on search and filters
   const filteredItems = React.useMemo(() => {
@@ -102,9 +128,28 @@ export function SpineViewer({ onSelectItems, selectionMode = false }: SpineViewe
     }
   };
 
+  const handleAddNote = (itemId: string) => {
+    setNoteTargetId(itemId);
+    setEditingNote(undefined);
+    setShowNoteEditor(true);
+  };
+
+  const handleEditNote = (note: StickyNote) => {
+    setNoteTargetId(note.target_id);
+    setEditingNote(note);
+    setShowNoteEditor(true);
+  };
+
+  const handleNoteSaved = () => {
+    setShowNoteEditor(false);
+    setNoteTargetId(null);
+    setEditingNote(undefined);
+  };
+
   const renderItem = ({ item }: { item: SpineItem }) => {
     const isSelected = selectedItems.has(item.id);
     const date = new Date(item.timestamp);
+    const itemNotes = stickyNotesMap.get(item.id) || [];
     const categoryColors: Record<MessageCategory, string> = {
       [MessageCategory.ACCESS_DENIED]: '#EF4444',
       [MessageCategory.FINANCIAL_STRAIN]: '#F59E0B',
@@ -137,7 +182,28 @@ export function SpineViewer({ onSelectItems, selectionMode = false }: SpineViewe
               {item.direction === 'inbound' ? '←' : '→'} {item.counterpart}
             </Text>
           </View>
-          <View className="flex-row gap-2">
+          <View className="flex-row gap-2 items-center">
+            {/* Sticky note indicator */}
+            {itemNotes.length > 0 && (
+              <TouchableOpacity
+                onPress={() => handleEditNote(itemNotes[0])}
+                className="px-2 py-1"
+              >
+                <StickyNoteDisplay note={itemNotes[0]} compact />
+              </TouchableOpacity>
+            )}
+            {/* Add note button */}
+            {!selectionMode && itemNotes.length === 0 && (
+              <TouchableOpacity
+                onPress={() => handleAddNote(item.id)}
+                className="px-2 py-1 rounded"
+                style={{ backgroundColor: colors.background }}
+              >
+                <Text className="text-xs" style={{ color: colors.textSecondary }}>
+                  📝
+                </Text>
+              </TouchableOpacity>
+            )}
             <View
               className="px-2 py-1 rounded"
               style={{ backgroundColor: categoryColors[item.category] + '20' }}
@@ -164,6 +230,16 @@ export function SpineViewer({ onSelectItems, selectionMode = false }: SpineViewe
           <Text className="text-xs mt-1" style={{ color: colors.textSecondary }}>
             Duration: {Math.floor(item.call_duration / 60)}m {item.call_duration % 60}s
           </Text>
+        )}
+        {/* Display sticky notes inline */}
+        {itemNotes.length > 0 && (
+          <View className="mt-2">
+            {itemNotes.map(note => (
+              <TouchableOpacity key={note.id} onPress={() => handleEditNote(note)}>
+                <StickyNoteDisplay note={note} />
+              </TouchableOpacity>
+            ))}
+          </View>
         )}
       </TouchableOpacity>
     );
@@ -328,6 +404,22 @@ export function SpineViewer({ onSelectItems, selectionMode = false }: SpineViewe
           </View>
         }
       />
+
+      {/* Sticky Note Editor Modal */}
+      {noteTargetId && (
+        <StickyNoteEditor
+          visible={showNoteEditor}
+          targetType="spine"
+          targetId={noteTargetId}
+          existingNote={editingNote}
+          onClose={() => {
+            setShowNoteEditor(false);
+            setNoteTargetId(null);
+            setEditingNote(undefined);
+          }}
+          onSave={handleNoteSaved}
+        />
+      )}
     </View>
   );
 }

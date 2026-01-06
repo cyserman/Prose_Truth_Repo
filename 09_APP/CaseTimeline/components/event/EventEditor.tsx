@@ -7,6 +7,7 @@ import {
   ScrollView,
   Platform,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as DocumentPicker from "expo-document-picker";
@@ -16,6 +17,12 @@ import { useTimeline } from "@/lib/timeline-context";
 import { Picker } from "@react-native-picker/picker";
 import { VoiceRecorder } from "./VoiceRecorder";
 import { AudioPlayer } from "./AudioPlayer";
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/lib/spine-db';
+import { StickyNote, SpineItem } from '@/types/spine';
+import { StickyNoteEditor } from '../sticky-notes/StickyNoteEditor';
+import { StickyNoteDisplay } from '../sticky-notes/StickyNoteDisplay';
+import { format } from 'date-fns';
 
 interface EventEditorProps {
   visible: boolean;
@@ -41,6 +48,38 @@ export function EventEditor({
   const [note, setNote] = useState(existingEvent?.note || "");
   const [attachments, setAttachments] = useState(existingEvent?.attachments || []);
   const [voiceNote, setVoiceNote] = useState(existingEvent?.voiceNote);
+  
+  // Sticky note state
+  const [showStickyNoteEditor, setShowStickyNoteEditor] = useState(false);
+  const [editingStickyNote, setEditingStickyNote] = useState<StickyNote | undefined>(undefined);
+  
+  // Get sticky notes for this event (if it exists)
+  const eventStickyNotes = useLiveQuery(
+    async () => {
+      if (!existingEvent?.id) return [];
+      return await db.stickyNotes
+        .where('[target_type+target_id]')
+        .equals(['timeline', existingEvent.id])
+        .toArray();
+    },
+    [existingEvent?.id],
+    []
+  );
+
+  // Get linked spine items for this event (if it has source_refs)
+  const linkedSpineItems = useLiveQuery(
+    async () => {
+      if (!existingEvent?.source_refs || existingEvent.source_refs.length === 0) return [];
+      const items: SpineItem[] = [];
+      for (const ref of existingEvent.source_refs) {
+        const item = await db.spine.get(ref);
+        if (item) items.push(item);
+      }
+      return items;
+    },
+    [existingEvent?.source_refs?.join(',')],
+    []
+  );
 
   useEffect(() => {
     if (visible) {
@@ -213,6 +252,38 @@ export function EventEditor({
               />
             </View>
 
+            {/* Linked Spine Items */}
+            {linkedSpineItems && linkedSpineItems.length > 0 && (
+              <View>
+                <Text className="text-sm font-medium text-foreground mb-2">
+                  🔗 Linked Messages ({linkedSpineItems.length})
+                </Text>
+                <View className="bg-surface border border-border rounded-lg overflow-hidden">
+                  {linkedSpineItems.map((item, index) => (
+                    <View
+                      key={item.id}
+                      className={`p-3 ${index !== linkedSpineItems.length - 1 ? 'border-b border-border' : ''}`}
+                    >
+                      <View className="flex-row justify-between items-start mb-1">
+                        <Text className="text-xs text-muted">
+                          {format(new Date(item.timestamp), 'MMM d, yyyy h:mm a')}
+                        </Text>
+                        <Text className="text-xs text-muted">
+                          {item.direction === 'inbound' ? '←' : '→'} {item.counterpart}
+                        </Text>
+                      </View>
+                      <Text className="text-sm text-foreground" numberOfLines={3}>
+                        {item.content_original}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+                <Text className="text-xs text-muted mt-1">
+                  These messages were promoted from the spine to create this event
+                </Text>
+              </View>
+            )}
+
             {/* Attachments */}
             <View>
               <Text className="text-sm font-medium text-foreground mb-2">Attachments</Text>
@@ -278,6 +349,48 @@ export function EventEditor({
                 />
               )}
             </View>
+
+            {/* Sticky Notes Section */}
+            {existingEvent && (
+              <View>
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="text-sm font-medium text-foreground">Private Notes</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setEditingStickyNote(undefined);
+                      setShowStickyNoteEditor(true);
+                    }}
+                    className="px-3 py-1 rounded-lg bg-surface border border-border"
+                  >
+                    <Text className="text-sm text-muted">+ Add Note</Text>
+                  </TouchableOpacity>
+                </View>
+                
+                {eventStickyNotes && eventStickyNotes.length > 0 ? (
+                  <View className="gap-2">
+                    {eventStickyNotes.map((stickyNote) => (
+                      <TouchableOpacity
+                        key={stickyNote.id}
+                        onPress={() => {
+                          setEditingStickyNote(stickyNote);
+                          setShowStickyNoteEditor(true);
+                        }}
+                      >
+                        <StickyNoteDisplay note={stickyNote} />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ) : (
+                  <View className="bg-surface border border-dashed border-border rounded-lg p-4 items-center">
+                    <Text className="text-2xl mb-1">📝</Text>
+                    <Text className="text-sm text-muted">No private notes yet</Text>
+                    <Text className="text-xs text-muted mt-1">
+                      Private notes are not included in exports by default
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
         </ScrollView>
 
@@ -326,6 +439,24 @@ export function EventEditor({
           </View>
         </View>
       </View>
+
+      {/* Sticky Note Editor Modal */}
+      {existingEvent && (
+        <StickyNoteEditor
+          visible={showStickyNoteEditor}
+          targetType="timeline"
+          targetId={existingEvent.id}
+          existingNote={editingStickyNote}
+          onClose={() => {
+            setShowStickyNoteEditor(false);
+            setEditingStickyNote(undefined);
+          }}
+          onSave={() => {
+            setShowStickyNoteEditor(false);
+            setEditingStickyNote(undefined);
+          }}
+        />
+      )}
     </Modal>
   );
 }

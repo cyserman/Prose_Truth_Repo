@@ -40,6 +40,10 @@ export function TimelineCell({ event, onPress }: TimelineCellProps) {
           {event.voiceNote && (
             <Text className="text-xs">🎤</Text>
           )}
+          {/* Show link icon if event has spine references */}
+          {event.source_refs && event.source_refs.length > 0 && (
+            <Text className="text-xs">🔗</Text>
+          )}
         </View>
       ) : (
         <Text className="text-center text-xs text-muted">+ Add</Text>

@@ -3,13 +3,17 @@ import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert, Pla
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { importAppCloseCSV } from '@/lib/csv-parser';
-import { db, sourceFileExists, bulkInsertSpineItems } from '@/lib/spine-db';
+import { db, sourceFileExists, bulkInsertSpineItems, clearAllData } from '@/lib/spine-db';
+import { exportFullDatabase, exportSpineItems, getExportSummary } from '@/lib/spine-export';
 import { ScreenContainer } from '@/components/screen-container';
 import { useColors } from '@/hooks/use-colors';
+import { useSpineDatabaseStats } from '@/hooks/use-spine-timeline';
 
 export default function ImportScreen() {
   const colors = useColors();
+  const stats = useSpineDatabaseStats();
   const [isImporting, setIsImporting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [importResult, setImportResult] = useState<{
     success: boolean;
     messagesImported: number;
@@ -242,6 +246,143 @@ export default function ImportScreen() {
             4. Wait for import to complete (may take a few seconds for large files)
           </Text>
         </View>
+
+        {/* Database Statistics */}
+        <View className="mt-4 p-4 rounded-lg" style={{ backgroundColor: colors.card }}>
+          <Text className="font-semibold mb-3" style={{ color: colors.text }}>
+            Database Statistics
+          </Text>
+          <View className="flex-row flex-wrap gap-4">
+            <View className="flex-1 min-w-[100px]">
+              <Text className="text-2xl font-bold" style={{ color: colors.tint }}>
+                {stats.spineCount}
+              </Text>
+              <Text className="text-xs" style={{ color: colors.textSecondary }}>
+                Spine Items
+              </Text>
+            </View>
+            <View className="flex-1 min-w-[100px]">
+              <Text className="text-2xl font-bold" style={{ color: colors.tint }}>
+                {stats.timelineCount}
+              </Text>
+              <Text className="text-xs" style={{ color: colors.textSecondary }}>
+                Timeline Events
+              </Text>
+            </View>
+            <View className="flex-1 min-w-[100px]">
+              <Text className="text-2xl font-bold" style={{ color: colors.tint }}>
+                {stats.stickyNotesCount}
+              </Text>
+              <Text className="text-xs" style={{ color: colors.textSecondary }}>
+                Sticky Notes
+              </Text>
+            </View>
+            <View className="flex-1 min-w-[100px]">
+              <Text className="text-2xl font-bold" style={{ color: colors.tint }}>
+                {stats.sourceFilesCount}
+              </Text>
+              <Text className="text-xs" style={{ color: colors.textSecondary }}>
+                Source Files
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Export Section */}
+        <View className="mt-4 p-4 rounded-lg" style={{ backgroundColor: colors.card }}>
+          <Text className="font-semibold mb-3" style={{ color: colors.text }}>
+            Export Data
+          </Text>
+          <Text className="text-sm mb-3" style={{ color: colors.textSecondary }}>
+            Export your data for backup or sharing. Private notes are excluded by default.
+          </Text>
+          <View className="flex-row gap-2">
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  setIsExporting(true);
+                  await exportFullDatabase();
+                } catch (error) {
+                  Alert.alert('Error', 'Failed to export data');
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+              disabled={isExporting}
+              className="flex-1 rounded-lg p-3 items-center"
+              style={{
+                backgroundColor: isExporting ? colors.border : colors.tint,
+                opacity: isExporting ? 0.6 : 1,
+              }}
+            >
+              <Text className="text-white font-semibold">
+                {isExporting ? 'Exporting...' : 'Export All'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  setIsExporting(true);
+                  await exportSpineItems();
+                } catch (error) {
+                  Alert.alert('Error', 'Failed to export spine');
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+              disabled={isExporting}
+              className="flex-1 rounded-lg p-3 items-center border"
+              style={{
+                borderColor: colors.border,
+                opacity: isExporting ? 0.6 : 1,
+              }}
+            >
+              <Text style={{ color: colors.text }} className="font-semibold">
+                Export Spine Only
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Danger Zone */}
+        <View className="mt-4 p-4 rounded-lg border border-red-500" style={{ backgroundColor: colors.card }}>
+          <Text className="font-semibold mb-2 text-red-500">
+            Danger Zone
+          </Text>
+          <Text className="text-sm mb-3" style={{ color: colors.textSecondary }}>
+            Clear all data from the database. This cannot be undone.
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                'Clear All Data',
+                'Are you sure you want to delete all spine items, timeline events, and sticky notes? This cannot be undone.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Delete Everything',
+                    style: 'destructive',
+                    onPress: async () => {
+                      try {
+                        await clearAllData();
+                        Alert.alert('Success', 'All data has been cleared');
+                        setImportResult(null);
+                      } catch (error) {
+                        Alert.alert('Error', 'Failed to clear data');
+                      }
+                    },
+                  },
+                ]
+              );
+            }}
+            className="rounded-lg p-3 items-center bg-red-500"
+          >
+            <Text className="text-white font-semibold">Clear All Data</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Spacer at bottom */}
+        <View className="h-8" />
       </ScrollView>
     </ScreenContainer>
   );
