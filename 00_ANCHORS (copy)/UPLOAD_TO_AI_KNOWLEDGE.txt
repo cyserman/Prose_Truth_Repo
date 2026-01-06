@@ -1,0 +1,74 @@
+=== THREAD ANCHOR ===
+Date: 2025-12-17
+Owner: Christopher Firey
+
+PURPOSE
+Freeze context and prevent hallucination
+
+GROUND TRUTH
+• Vehicle failure (2004 Ford F-250) during custody exchange
+• Communication interference ongoing (blocked app)
+• Housing-insecure but employed
+
+CORE LEGAL THEORY
+Manufactured imbalance, not parental fitness
+Pattern: Removal → Denial of tools → PFA filings → Delay → Status quo hardening
+
+STRATEGIC OBJECTIVES
+1. Neutralize status quo
+2. Restore court oversight
+3. Re-establish parent-child contact
+4. Remove financial leverage
+
+TIMELINE-FIRST STRATEGY
+If it can be dated, it goes on the timeline.
+If it can be documented, it gets an exhibit code.
+Goal: Judge understands in under 10 minutes.
+
+=== WHAT A WIN LOOKS LIKE ===
+
+Winning is correction and trajectory, not domination.
+
+- Status quo loses immunity
+- Court oversight restored
+- Ramped custody begins
+- Financial leverage collapses
+- Case becomes boring
+
+NOT A WIN:
+- Public scolding
+- Moral vindication
+- Instant 50/50
+
+=== README ===
+
+# ⚖️ PRO SE LEGAL DB (The Truth Repo)
+
+Case: Firey v. Firey
+Jurisdiction: Montgomery County, PA
+
+PURPOSE
+Single, authoritative source of truth. Designed to survive device failure and counsel changes.
+For AI Agents: Do not hallucinate. Use only files present here.
+
+DIRECTORY STRUCTURE
+00_ANCHORS – Constitutional anchors
+02_TIMELINES – Data core (CSVs)
+03_EXHIBITS – Finalized evidence
+06_SCANS – Input funnel
+09_APP – React tooling
+
+AI PRIME DIRECTIVE
+1. Read 00_ANCHORS first
+2. Neutralize emotional input
+3. Identify manufactured imbalance
+
+=== UI STATUS ===
+
+React app with:
+- Timeline builder with neutralization
+- CSV import/export
+- Strategic analyzer
+- Print-to-PDF output
+
+Next: LocalStorage persistence, auto-summary builder

@@ -1,0 +1,20 @@
+UI AUDIT — PROSE LEGAL DB (REACT VERSION)
+═══════════════════════════════════════════════
+
+STATUS: UI phase complete
+
+FEATURES
+✅ Timeline builder with neutralization
+✅ CSV import/export
+✅ Strategic analyzer
+✅ Print-to-PDF judge-ready output
+
+NEXT STEPS
+→ LocalStorage persistence
+→ Auto-summary builder
+→ Cleaned CSV export
+
+ARCHITECTURE
+React + Vite + TailwindCSS
+Local-first, no backend required
+Gemini integration for strategic analysis

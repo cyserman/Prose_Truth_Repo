@@ -1,0 +1,8 @@
+0000000000000000000000000000000000000000 eea11233ac692820bac3961608b0b713b5c24e22 Your Name <your_email@example.com> 1767466626 -0500	clone: from github.com:cyserman/Prose_Truth_Repo.git
+eea11233ac692820bac3961608b0b713b5c24e22 eea11233ac692820bac3961608b0b713b5c24e22 Your Name <your_email@example.com> 1767471920 -0500	reset: moving to origin/main
+eea11233ac692820bac3961608b0b713b5c24e22 eea11233ac692820bac3961608b0b713b5c24e22 cyserman <your_email@example.com> 1767479693 -0500	checkout: moving from main to feature/integrate-casetimeline-mobile
+eea11233ac692820bac3961608b0b713b5c24e22 dcc446d6c41413b67b9622634f17721015c97004 cyserman <your_email@example.com> 1767485029 -0500	commit: feat: integrate CaseTimeline mobile app and Chromebook Toolbox v2
+dcc446d6c41413b67b9622634f17721015c97004 c2629da20053eb4d092d4369614b68d08971b319 cyserman <your_email@example.com> 1767490864 -0500	checkout: moving from feature/integrate-casetimeline-mobile to copilot/add-prose-truth-integration
+c2629da20053eb4d092d4369614b68d08971b319 2edfca7bce38b272a9eed280f0df1b2c756c10e4 cyserman <your_email@example.com> 1767494510 -0500	commit: feat: integrate CaseTimeline mobile app and Chromebook Toolbox v2
+2edfca7bce38b272a9eed280f0df1b2c756c10e4 21df7b76624f6e05eb7e2e9e143177e03f27641f cyserman <your_email@example.com> 1767514869 -0500	commit: Release: ProSe Legal DB v1.0-alpha (final)
+21df7b76624f6e05eb7e2e9e143177e03f27641f f5ce576856f40adef42140af8ced21caebdc1f0d cyserman <your_email@example.com> 1767515047 -0500	commit: chore: remove large ZIP file and add to .gitignore
