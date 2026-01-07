@@ -70,7 +70,7 @@ jobs:
           fetch-depth: 0  # Full history for detect-secrets
       
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       
