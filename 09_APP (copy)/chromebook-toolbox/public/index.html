@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Chromebook Toolbox v2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🐧 Chromebook Dev Toolbox</h1>
+  
+  <nav>
+    <button data-tab="terminal">🖥 Terminal</button>
+    <button data-tab="notepad">📋 Notepad</button>
+    <button data-tab="mic">🎙 Recorder</button>
+    <button data-tab="upload">📁 File Upload</button>
+  </nav>
+
+  <section id="terminal" class="tab-content">
+    <div id="term"></div>
+  </section>
+
+  <section id="notepad" class="tab-content hidden">
+    <textarea id="notepadText" placeholder="Write here..."></textarea>
+    <button onclick="saveNote()">💾 Save</button>
+  </section>
+
+  <section id="mic" class="tab-content hidden">
+    <button onclick="startRecording()">⏺️ Start</button>
+    <button onclick="stopRecording()">⏹️ Stop</button>
+  </section>
+
+  <section id="upload" class="tab-content hidden">
+    <div id="dropzone">📤 Drop files here</div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.1.0/lib/xterm.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.1.0/css/xterm.css" />
+  <script src="tabs.js" type="module"></script>
+  <script src="app.js" type="module"></script>
+  <script src="record.js" type="module"></script>
+  <script src="terminal.js" type="module"></script>
+</body>
+</html>

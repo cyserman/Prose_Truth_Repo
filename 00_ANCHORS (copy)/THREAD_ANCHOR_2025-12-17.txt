@@ -1,0 +1,29 @@
+THREAD ANCHOR
+Date: 2025-12-17
+Owner: Christopher Firey
+
+PURPOSE
+Freeze factual, strategic, and architectural conclusions to prevent context loss.
+
+GROUND TRUTH
+• Vehicle failure (2004 Ford F-250) during custody exchange
+• Communication interference ongoing (blocked app)
+• Housing-insecure but employed
+
+CORE LEGAL THEORY
+Manufactured imbalance, not parental fitness
+Pattern: Removal → Denial of tools → PFA filings → Delay → Status quo hardening
+
+STRATEGIC OBJECTIVES
+1. Neutralize status quo
+2. Restore court oversight
+3. Re-establish parent-child contact
+4. Remove financial leverage
+
+TIMELINE-FIRST STRATEGY
+If it can be dated, it goes on the timeline.
+If it can be documented, it gets an exhibit code.
+Goal: Judge understands in under 10 minutes.
+
+SOFTWARE
+Local-first Pro Se Legal DB: Import → Index → Print

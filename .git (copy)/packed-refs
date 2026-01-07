@@ -1,0 +1,17 @@
+# pack-refs with: peeled fully-peeled sorted 
+4480747b6f07e94835a79879f5f40b116f83bd94 refs/remotes/origin/copilot/add-chromebook-toolbox-integration
+c2629da20053eb4d092d4369614b68d08971b319 refs/remotes/origin/copilot/add-prose-truth-integration
+23b8cc99713a6654a3299c24bff22ccd73e55439 refs/remotes/origin/copilot/setup-ssh-access
+0dea70a183cb5f4530acd19e76792819b10d1fe6 refs/remotes/origin/cursor/local-feature-and-ssl-setup-cec2
+d39c6b7e511408d17fd812ee33326df4246555b1 refs/remotes/origin/dependabot/github_actions/actions/github-script-8
+31219602956cc86ac2cdaa4e26b88abcce5fb5a8 refs/remotes/origin/dependabot/github_actions/actions/setup-node-6
+445491f065e0cbe537a2c82c733faa3aef2adaa3 refs/remotes/origin/dependabot/github_actions/actions/setup-python-6
+f08999b4d6cc42ed12cd8076d4e55e8009591d3f refs/remotes/origin/dependabot/github_actions/actions/upload-artifact-6
+1d76b2b40b4fcaaf4855753e4e50e77f3de026ae refs/remotes/origin/dependabot/github_actions/softprops/action-gh-release-2
+fcd8bee87ab25a8db7f7cab8b9b010210159c61e refs/remotes/origin/dependabot/npm_and_yarn/09_APP/prose-legal-db-app/lucide-react-0.562.0
+4f0eed377ccee3a2803d2c2f1fdf12021dfbc31f refs/remotes/origin/jules-fix-repo-and-verify-2404318478379482166
+eea11233ac692820bac3961608b0b713b5c24e22 refs/remotes/origin/main
+eea11233ac692820bac3961608b0b713b5c24e22 refs/remotes/origin/nypull
+df7570db49bbfe69901e0cd648cb1482862bc8c6 refs/remotes/origin/standalone-component
+a43fa63598b4dfcfde8edd5f04547b7618d9504f refs/tags/v1.0-alpha
+^bcaa28d15d791b1b54cebef1a7d5d52f98a44227
