@@ -25,7 +25,7 @@ jobs:
       
       - name: Upload secrets report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: secrets-report
           path: .secrets.baseline
@@ -83,7 +83,7 @@ jobs:
         run: npm run build
       
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: react-build
           path: 09_APP/prose-legal-db-app/dist
