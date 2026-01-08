@@ -1,10 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ActiveLayer, EvidenceType, VerificationStatus } from './types';
 import type { EvidenceItem } from './types';
 import { Layout } from './components/shared/Layout';
 import { Dashboard } from './components/views/Dashboard';
 import { SpineView } from './components/views/SpineView';
 import { TimelineView } from './components/views/TimelineView';
+import { importCSV, exportCSV, exportJSON } from './services/csv';
+import { SwimlaneView } from './components/views/SwimlaneView';
+import { DeadlineTracker } from './components/views/DeadlineTracker';
+import { AIAnalysisView } from './components/views/AIAnalysisView';
+import { NotesView } from './components/views/NotesView';
+import { saveEvidence } from './services/storage';
 
 // Mock data for initial testing
 const MOCK_EVIDENCE: EvidenceItem[] = [
@@ -69,6 +75,7 @@ export default function App() {
   const [activeLayer, setActiveLayer] = useState<ActiveLayer>(ActiveLayer.DASHBOARD);
   const [evidence, setEvidence] = useState<EvidenceItem[]>(MOCK_EVIDENCE);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     console.log('CaseCraft Unified - Initialized');
@@ -85,6 +92,52 @@ export default function App() {
     setEvidence(prev => prev.map(item =>
       item.id === updated.id ? updated : item
     ));
+  };
+
+  // CSV Import Handler
+  const handleImport = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const imported = await importCSV(file);
+      const merged = [...evidence, ...imported];
+      setEvidence(merged);
+      saveEvidence(merged);
+      alert(`✅ Successfully imported ${imported.length} evidence items`);
+    } catch (error) {
+      console.error('Import error:', error);
+      alert('❌ Failed to import CSV. Please check the file format.');
+    }
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // CSV Export Handler
+  const handleExport = () => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    exportCSV(evidence, `casecraft-export-${timestamp}.csv`);
+  };
+
+  // JSON Backup Handler (replacing Print for now)
+  const handleBackup = () => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    exportJSON(
+      {
+        evidence,
+        version: '1.0.0',
+        exported: new Date().toISOString(),
+        count: evidence.length
+      },
+      `casecraft-backup-${timestamp}.json`
+    );
   };
 
   const renderContent = () => {
@@ -106,6 +159,18 @@ export default function App() {
             onUpdateEvidence={updateEvidence}
           />
         );
+      case ActiveLayer.SWIMLANE:
+        return (
+          <SwimlaneView 
+            evidence={evidence}
+          />
+        );
+      case ActiveLayer.DEADLINES:
+        return <DeadlineTracker />;
+      case ActiveLayer.NOTES:
+        return <NotesView />;
+      case ActiveLayer.AI:
+        return <AIAnalysisView evidence={evidence} />;
       default:
         return (
           <div className="p-6">
@@ -117,16 +182,27 @@ export default function App() {
   };
 
   return (
-    <Layout
-      activeLayer={activeLayer}
-      setActiveLayer={setActiveLayer}
-      isSidebarOpen={isSidebarOpen}
-      setSidebarOpen={setSidebarOpen}
-      onImport={() => console.log('Import clicked')}
-      onExport={() => console.log('Export clicked')}
-      onPrint={() => window.print()}
-    >
-      {renderContent()}
-    </Layout>
+    <>
+      {/* Hidden file input for CSV import */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      <Layout
+        activeLayer={activeLayer}
+        setActiveLayer={setActiveLayer}
+        isSidebarOpen={isSidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        onImport={handleImport}
+        onExport={handleExport}
+        onPrint={handleBackup}
+      >
+        {renderContent()}
+      </Layout>
+    </>
   );
 }
