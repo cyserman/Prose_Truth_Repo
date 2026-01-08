@@ -1,505 +1,234 @@
-# 🎯 ProSe Legal DB - Complete Feature List
+# 🎯 CaseCraft Unified - Complete Feature List
 
-**Comprehensive documentation of all features and capabilities.**
-
----
-
-## 📊 Core Timeline Features
-
-### Timeline Management
-- ✅ **Event Timeline View**
-  - Chronological table of all case events
-  - Search and filter functionality
-  - Category-based filtering
-  - Date-based sorting
-  - Event ID tracking
-
-- ✅ **Swimlane Timeline View**
-  - Visual timeline organized by category
-  - Multiple lane profiles (Custody, PFA, Financial, Court Prep, All)
-  - Interactive event bubbles
-  - Click-to-edit notes
-  - Profile switching with saved preferences
-
-- ✅ **Event Classification**
-  - Multiple categories per event
-  - Types: PFA, Custody_Exchange, Communication, Court_Filing, Court_Order, Financial, Housing, Vehicle, Employment, Third_Party, Other
-  - Color-coded badges
-  - Category-based filtering
-
-- ✅ **Language Neutralization**
-  - AI-powered conversion of emotional language to court-ready text
-  - Preserves original text in history
-  - Automatic neutralization on demand
-  - Examples: "She refused" → "The request was declined"
+**Unified legal case management combining CaseCraft Pro + Prose Legal DB**
 
 ---
 
-## 📁 File & Evidence Management
+## 📊 **CASECRAFT UNIFIED** (New - Current Development)
 
-### Evidence Organizer
-- ✅ **File Upload**
-  - Drag-and-drop interface
-  - Multiple file support
-  - Duplicate detection
-  - Version management
+### ✅ Active Features (v1.0.0-beta)
 
-- ✅ **File Classification**
-  - Multi-select categories
-  - Logic checks (e.g., "Incident without Evidence?")
-  - Flagging system (needs_evidence, unlinked_evidence, etc.)
-  - Automatic timeline logging
+#### Dashboard
+- **Evidence Statistics** - Total/Verified/Timeline/Pending counts
+- **Recent Activity** - Last 5 evidence items
+- **Visual Analytics** - Color-coded cards with Lucide icons
+- **Quick Navigation** - Jump to any view
 
-- ✅ **File Processing**
-  - OCR integration ready
-  - Status tracking (Pending OCR, OCR Complete, Filed)
-  - AI analysis option
-  - Processing info display
+#### Truth Spine (Evidence Repository)
+- **Search & Filter** - Full-text across all fields
+- **Tag Management** - Add/remove tags, multi-tag filtering
+- **Verification Status** - Cycle: Pending → Verified → Disputed → Unverified
+- **Timeline Management** - Promote/demote evidence
+- **Exhibit Tracking** - Court exhibit codes
+- **SHA-256 Hashing** - Automatic forensic integrity
+- **Multi-Lane Organization** - Custody/Safety/Financial/Procedural/Communication/etc.
+- **Real-time Updates** - LocalStorage auto-save
 
-- ✅ **File Metadata**
-  - File size display
-  - Upload date tracking
-  - Source path tracking
-  - Exhibit code linking
+#### Timeline View
+- **Chronological Display** - Sorted by timestamp
+- **Sort Controls** - Oldest-first / Newest-first
+- **Lane Assignment** - Organize by case category
+- **Visual Timeline** - Vertical line with status dots
+- **Detailed Cards** - Full metadata display
+- **Inline Editing** - Update lane assignments
 
----
+#### CSV Import/Export
+- **CSV Import** - Drag-drop or file picker
+- **Auto SHA-256** - Hash generation on import
+- **Field Mapping** - Supports multiple CSV formats
+- **CSV Export** - Complete evidence download
+- **JSON Backup** - Full state archival
+- **Timestamped Files** - Auto-dated exports
 
-## 🎤 Voice & Input Features
+#### Professional UI/UX
+- **Dark Sidebar** - Slate-900 with white text
+- **Blue Active States** - bg-blue-600 for current view
+- **Responsive Design** - Mobile/tablet/desktop breakpoints
+- **Hamburger Menu** - Mobile-friendly navigation
+- **WCAG Compliant** - Accessibility-focused
+- **PWA Ready** - installable, offline-capable
 
-### Voice Input
-- ✅ **Speech-to-Text**
-  - Web Speech API integration
-  - Real-time transcription
-  - Available in multiple locations:
-    - File notes
-    - Event notes
-    - Floating note console
-    - Timeline editing
+### Technology Stack
+- **Frontend**: React 19 + TypeScript 5.8 + Vite 7
+- **Styling**: Tailwind CSS 4.x
+- **Icons**: Lucide React
+- **CSV**: papaparse 5.5+
+- **Storage**: Browser LocalStorage
+- **Deployment**: Local-only (Vercel-ready for demos)
 
-- ✅ **Microphone Recording**
-  - Voice note recording
-  - Saved as audio files
-  - Automatic transcription option
+### Privacy & Security
+- ✅ **100% Local** - No cloud storage
+- ✅ **No Telemetry** - Zero external calls
+- ✅ **SHA-256 Hashing** - Forensic integrity
+- ✅ **Air-gap Capable** - USB `dist/` deployment
+- ✅ **`.env` Security** - API keys gitignored
 
-### Text Input
-- ✅ **Spell Check**
-  - Enabled on all text areas
-  - Browser-native spell checking
-
-- ✅ **Rich Text Areas**
-  - Multi-line support
-  - Auto-resize
-  - Placeholder text
-  - Character counting
-
----
-
-## 📝 Note-Taking Features
-
-### Floating Note Console
-- ✅ **Always-Available Notes**
-  - Draggable/movable console
-  - Always visible overlay
-  - Quick access from anywhere
-
-- ✅ **Event Attachment**
-  - Click event to attach note
-  - Visual link indicator
-  - Automatic linking
-
-- ✅ **Voice & Text Input**
-  - Type or record notes
-  - Speech-to-text support
-  - Character counter
-
-- ✅ **Auto-Export**
-  - CSV export
-  - JSON trigger for watcher
-  - Timeline integration
-
-### Floating Evidence Console
-- ✅ **File Drop & Processing**
-  - Drag-and-drop file interface
-  - Click-to-select file picker
-  - Multiple file support
-  - AI normalization integration
-
-- ✅ **Dual Input Modes**
-  - Note tab: Text input + file drop
-  - Mic tab: Audio recording (MediaRecorder API)
-  - Tab switching for different workflows
-
-- ✅ **AI Integration**
-  - Automatic file normalization
-  - Local endpoint support (localhost:5001)
-  - Fallback handling for offline mode
-  - Summary preview panel
-
-- ✅ **Watcher Automation**
-  - Automatic case_updates.json generation
-  - File drop triggers
-  - Manual watcher activation button
-  - Timeline integration ready
-
-- ✅ **Resizable & Draggable**
-  - react-rnd integration
-  - Window bounds respect
-  - Position persistence ready
-  - Smooth animations
-
-### Sticky Notes
-- ✅ **Smart Sticky Notes**
-  - Positionable notes
-  - Attach to events/files
-  - Save/close functionality
-  - Multiple notes support
+### 🚧 In Development
+- Swimlane View (multi-lane visualization)
+- AI Analysis (optional Gemini integration)
+- Sticky Notes (draggable react-rnd)
+- Deadline Tracker
+- Contradiction Detector
+- Motion Builder
+- PDF Generation
 
 ---
 
-## 📄 Document Generation
+## 📋 **PROSE LEGAL DB** (Original Feature Set)
 
-### Motion Builder
-- ✅ **Document Templates**
+*The following features are from the original Prose Legal DB app and will be migrated to CaseCraft Unified*
+
+### Timeline Features
+- ✅ Event Timeline View
+- ✅ Swimlane Timeline (multi-category)
+- ✅ Event Classification (PFA, Custody, Court, Financial, etc.)
+- ✅ Language Neutralization (AI-powered)
+- ✅ Search & Filter
+- ✅ Date-based Sorting
+
+### File & Evidence Management
+- ✅ File Upload (drag-drop)
+- ✅ File Classification (multi-select categories)
+- ✅ Logic Checks ("Incident without Evidence?")
+- ✅ OCR Integration Ready
+- ✅ Status Tracking (Pending OCR, Complete, Filed)
+- ✅ Metadata (file size, upload date, source path)
+
+### Voice & Input Features
+- ✅ Speech-to-Text (Web Speech API)
+- ✅ Microphone Recording
+- ✅ Multi-location Voice Input (notes, events, timeline)
+- ✅ Spell Check Enabled
+- ✅ Rich Text Areas
+
+### Note-Taking
+- ✅ Floating Note Console (draggable overlay)
+- ✅ Event Attachment (click-to-link)
+- ✅ Voice & Text Input
+- ✅ Auto-Export (CSV/JSON)
+- ✅ Floating Evidence Console (drag-drop files)
+- ✅ AI Normalization (localhost:5001)
+- ✅ Smart Sticky Notes (positionable)
+
+### Document Generation
+- ✅ Motion Builder
   - Motion for Custody
   - Affidavit
   - Motion to Compel
   - Response to Motion
+- ✅ Auto-Population from timeline
+- ✅ Section Editing
+- ✅ TXT/PDF Export
+- ✅ Court-ready Formatting
 
-- ✅ **Auto-Population**
-  - Select timeline events
-  - Auto-fill sections
-  - Include exhibit references
-  - Chronological ordering
+### Deadline Management
+- ✅ Deadline Tracker
+- ✅ Visual Dashboard (Overdue/Due Today/This Week)
+- ✅ Status Tracking
+- ✅ Browser Notifications
+- ✅ Reminder System
 
-- ✅ **Section Editing**
-  - Individual section editors
-  - Required/optional indicators
-  - Rich text support
-  - Preview before export
-
-- ✅ **Export Options**
-  - TXT export
-  - Print/PDF generation
-  - Court-ready formatting
-  - Verification section (for Affidavits)
-
----
-
-## 📅 Deadline Management
-
-### Deadline Tracker
-- ✅ **Deadline Creation**
-  - Title, date, type, description
-  - Reminder system (days before)
-  - Multiple deadline types
-
-- ✅ **Visual Dashboard**
-  - Overdue count
-  - Due today count
-  - This week count
-  - Total deadlines
-
-- ✅ **Status Tracking**
-  - Color-coded status
-  - Complete/incomplete toggle
-  - Delete functionality
-  - Persistent storage
-
-- ✅ **Notifications**
-  - Browser notification support
-  - Customizable reminder days
-  - Permission management
-  - Auto-alerts
-
----
-
-## 🔍 Analysis Features
-
-### Contradiction Detector
-- ✅ **Automated Analysis**
-  - Scans timeline for contradictions
+### Analysis Features
+- ✅ Contradiction Detector
+  - Automated timeline scanning
   - Topic-based grouping
   - Severity levels (High/Medium)
-
-- ✅ **Contradiction Types**
-  - Positive/Negative statement conflicts
-  - Timeline inconsistencies
-  - Impossible sequences
-
-- ✅ **Results Display**
   - Side-by-side comparison
-  - Event details with dates
-  - Search/filter functionality
-  - Severity indicators
-
-### Strategic Analyzer
-- ✅ **AI-Powered Analysis**
-  - Gemini API integration
+- ✅ Strategic Analyzer (Gemini AI)
   - Pattern detection
   - Strategy suggestions
   - Timeline gap analysis
 
----
+### Data Management
+- ✅ CSV Import (upload/paste)
+- ✅ Data Validation
+- ✅ JSON Export (complete backup)
+- ✅ Markdown Export
+- ✅ PDF Export
 
-## 🔄 Data Management
+### Automation
+- ✅ Repo Agent (Backend)
+  - File watching (`09_APP/Generated/`)
+  - Guided intake
+  - Automatic routing (CSV → Master_CaseDB)
+  - Timeline guarantee
+- ✅ Watcher Integration
+- ✅ Backend Communication
 
-### Import Features
-- ✅ **CSV Import**
-  - File upload
-  - Paste CSV text
-  - Multiple format support
-  - Duplicate handling
+### UI Features
+- ✅ Light/Dark/Textured Themes
+- ✅ Mobile-Friendly Responsive Design
+- ✅ Accessibility (keyboard, screen reader)
 
-- ✅ **Data Validation**
-  - Format checking
-  - Error reporting
-  - Success notifications
-
-### Export Features
-- ✅ **JSON Export**
-  - Complete data backup
-  - All events, files, notes
-  - Restorable format
-
-- ✅ **Markdown Export**
-  - Timeline in Markdown
-  - Documentation format
-  - Easy to read/edit
-
-- ✅ **PDF Export**
-  - Print-ready format
-  - Court-ready layout
-  - Professional formatting
+### Advanced Features
+- ✅ Lane Profiles (Custody/PFA/Financial/Court Prep/All)
+- ✅ Profile Management
+- ✅ Processing Info Display
+- ✅ Logic Checks & Flagging
 
 ---
 
-## 🤖 Automation Features
+## 📈 **Feature Migration Status**
 
-### Repo Agent (Backend)
-- ✅ **File Watching**
-  - Monitors `09_APP/Generated/`
-  - Automatic file detection
-  - Processing queue
+### ✅ Completed Migrations (CaseCraft Pro → Unified)
+- Dashboard
+- SpineView (Evidence Repository)
+- TimelineView (Chronological Display)
+- Layout Component (Dark Sidebar)
+- LocalStorage Service
+- CSV Import/Export
+- Badge/Card Components
 
-- ✅ **Guided Intake**
-  - Classification prompts
-  - Logic checks
-  - Note collection
-  - Processing info
+### 🚧 In Progress
+- SwimlaneTimeline (Multi-lane View)
+- AI Analysis View
+- Sticky Notes
 
-- ✅ **Automatic Routing**
-  - CSV → Master_CaseDB merge
-  - OCR → Text extraction
-  - Handler selection
-
-- ✅ **Timeline Guarantee**
-  - Everything gets logged
-  - Even incomplete entries
-  - Flagging system
-
----
-
-## 🎨 User Interface
-
-### Themes
-- ✅ **Light Theme**
-  - Clean, bright interface
-  - High contrast
-  - Professional appearance
-
-- ✅ **Dark Theme**
-  - Dark mode
-  - Low-light friendly
-  - Eye strain reduction
-
-- ✅ **Textured Theme**
-  - Textured blue background
-  - Visual depth
-  - Modern aesthetic
-
-### Responsive Design
-- ✅ **Mobile-Friendly**
-  - Responsive layout
-  - Touch-friendly controls
-  - Adaptive sizing
-
-- ✅ **Accessibility**
-  - Keyboard navigation
-  - Screen reader support
-  - High contrast options
+### 📋 Planned Migrations (Prose Legal DB → Unified)
+- Contradiction Detector
+- Deadline Tracker
+- Motion Builder
+- Floating Evidence Console
+- File Upload & OCR
+- Voice Input (Speech-to-Text)
+- Repo Agent Integration
 
 ---
 
-## 🔐 Data Security
+## 📊 Statistics
 
-### Local Storage
-- ✅ **Browser-Based**
-  - All data stored locally
-  - No server required
-  - Privacy-focused
+**CaseCraft Unified**: 8 features active, 7 in development  
+**Prose Legal DB**: 50+ features (legacy)  
+**CaseCraft Pro**: Foundation merged  
 
-- ✅ **Auto-Save**
-  - Automatic persistence
-  - No data loss
-  - Real-time updates
-
-### Backup & Restore
-- ✅ **Export/Import**
-  - JSON backup format
-  - Complete data restore
-  - Version control ready
+**Total Combined**: 60+ unique features across both platforms
 
 ---
 
-## 🧩 Advanced Features
+## 🎯 Roadmap
 
-### Lane Profiles
-- ✅ **Customizable Views**
-  - Custody profile
-  - PFA/Safety profile
-  - Financial profile
-  - Court Prep profile
-  - All Categories view
+### Q1 2026
+- [ ] Complete Swimlane View
+- [ ] CSV Import UX refinement
+- [ ] AI Analysis stub (Gemini optional)
+- [ ] Sticky Notes (react-rnd)
+- [ ] First Vercel demo deployment
 
-- ✅ **Profile Management**
-  - Save preferences
-  - Quick switching
-  - Custom lane selection
+### Q2 2026
+- [ ] Contradiction Detector
+- [ ] Deadline Tracker
+- [ ] Motion Builder (merged version)
+- [ ] PDF Generation
+- [ ] Truth Repo file integration
 
-### Processing Info
-- ✅ **File Routing Display**
-  - Destination shown
-  - Handler identified
-  - Action displayed
-  - ETA provided
-  - Rejection reasons
-
-### Logic Checks
-- ✅ **Reflexive Intake**
-  - "Did you forget Evidence?"
-  - "Link to incident?"
-  - "Add supporting documents?"
-  - Flagging system
+### Q3 2026
+- [ ] Voice Input (Speech-to-Text)
+- [ ] File Upload & OCR
+- [ ] Floating Evidence Console
+- [ ] Mobile app (PWA enhanced)
 
 ---
 
-## 📊 Statistics & Analytics
-
-### Dashboard Stats
-- ✅ **Event Counts**
-  - Total events
-  - By category
-  - By date range
-
-- ✅ **File Statistics**
-  - Total files
-  - By status
-  - By category
-
-- ✅ **Deadline Overview**
-  - Overdue count
-  - Upcoming count
-  - Completion rate
-
----
-
-## 🔗 Integration Features
-
-### Exhibit Linking
-- ✅ **Event-Exhibit Connection**
-  - Exhibit codes
-  - Automatic linking
-  - Reference tracking
-
-### Timeline Synchronization
-- ✅ **CSV Sync**
-  - Master_CaseDB.csv
-  - Real-time updates
-  - Bidirectional sync
-
-### Watcher Integration
-- ✅ **Backend Communication**
-  - JSON triggers
-  - Status updates
-  - Processing feedback
-
----
-
-## 🚀 Performance Features
-
-### Optimization
-- ✅ **Lazy Loading**
-  - Components load on demand
-  - Faster initial load
-  - Efficient memory use
-
-- ✅ **Caching**
-  - localStorage caching
-  - Timeline data cache
-  - Profile preferences
-
-### Search & Filter
-- ✅ **Fast Search**
-  - Real-time filtering
-  - Multi-field search
-  - Category filters
-
----
-
-## 📱 Browser Compatibility
-
-### Supported Browsers
-- ✅ **Chrome/Edge** (Full support)
-  - Speech recognition
-  - All features
-  - Best performance
-
-- ✅ **Firefox** (Most features)
-  - Core functionality
-  - Limited speech support
-
-- ✅ **Safari** (Core features)
-  - Basic functionality
-  - Some limitations
-
----
-
-## 🎯 Feature Roadmap
-
-### Planned Features
-- 🔄 **Calendar Integration**
-  - Google Calendar sync
-  - iCal export
-  - Court date tracking
-
-- 🔄 **Advanced OCR**
-  - PDF text extraction
-  - Image OCR
-  - Batch processing
-
-- 🔄 **Collaboration**
-  - Attorney sharing
-  - Comment system
-  - Activity log
-
-- 🔄 **Advanced Analytics**
-  - Pattern visualization
-  - Timeline gaps
-  - Contradiction scoring
-
----
-
-## 📈 Feature Statistics
-
-**Total Features:** 50+  
-**Core Features:** 15  
-**Document Tools:** 3  
-**AI Features:** 2  
-**Automation Features:** 4  
-**UI Features:** 8  
-
----
-
-**Last Updated:** December 2024  
-**Version:** 1.0
-
+**Last Updated**: 2026-01-07  
+**Current Focus**: CaseCraft Unified Development  
+**Primary Use Case**: Firey v. Firey Family Court Case
