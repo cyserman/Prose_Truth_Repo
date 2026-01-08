@@ -48,3 +48,4 @@ uploads/
 *.p12
 secrets/
 .secrets/
+.vercel
