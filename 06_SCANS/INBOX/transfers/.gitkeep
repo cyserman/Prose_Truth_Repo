@@ -1,0 +1,3 @@
+# This directory is for file transfers when SSH is not available
+# Files placed here WILL be committed and pushed to the repository
+# Use this to share files that need to be accessible remotely
